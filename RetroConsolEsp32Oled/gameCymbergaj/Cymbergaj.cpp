@@ -65,13 +65,13 @@ void PadlePosAiUpdate(cymGameStruct& CymGame, cymBallStruct& Ball,  cymPlayerStr
 
     switch(CymGame.aiLevel){
       case 1: //amator
-        deltaMoveY=2+random(-4,4);
+        deltaMoveY=2+random(-3,3);
         break;
       case 2: // normalny
-        deltaMoveY=4*random(0,3);
+        deltaMoveY=4*random(0,2);
         break;
       default: // geniusz
-        deltaMoveY=4;
+        deltaMoveY=2;
         break;
     }
     if (CymGame.playersNo != 2) {
@@ -94,16 +94,15 @@ void PadlePosAiUpdate(cymGameStruct& CymGame, cymBallStruct& Ball,  cymPlayerStr
 }
 
 void PadlePosPlayerUpdate(cymGameStruct& CymGame, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer) {
-  int PadleMinY = - CymGame.padleHalfWidth+5;
-  int PadleMaxY = FieldYmax + CymGame.padleHalfWidth -5;
+  int PadleMinY = 0;
+  int PadleMaxY = FieldYmax + 4;
 
   if (CymGame.playersNo != 0) {
     if ( IsPressed(UpLeft)) {
       LeftPlayer.y = LeftPlayer.y-CymGame.padleDeltaMoveY;
-      if ( LeftPlayer.y < PadleMinY) LeftPlayer.y = PadleMinY;
+      if (LeftPlayer.y < PadleMinY) LeftPlayer.y = PadleMinY;
       CymGame.updateScreen = true;
     }
-
     if ( IsPressed(DownLeft)) {
       LeftPlayer.y = LeftPlayer.y+CymGame.padleDeltaMoveY;
       if ( LeftPlayer.y > PadleMaxY ) LeftPlayer.y = PadleMaxY;
@@ -112,14 +111,14 @@ void PadlePosPlayerUpdate(cymGameStruct& CymGame, cymPlayerStruct& LeftPlayer, c
   }
 
   if (CymGame.playersNo == 2) {
-      if ( IsPressed(UpRight)) {
+      if (IsPressed(UpRight)) {
       RightPlayer.y = RightPlayer.y-CymGame.padleDeltaMoveY;
-      if ( RightPlayer.y < PadleMinY) RightPlayer.y = PadleMinY;
+      if (RightPlayer.y < PadleMinY) RightPlayer.y = PadleMinY;
       CymGame.updateScreen = true;
     }
-    if ( IsPressed(DownRight)) {
-      RightPlayer.y = RightPlayer.y+CymGame.padleDeltaMoveY;
-      if ( RightPlayer.y > PadleMaxY ) RightPlayer.y = PadleMaxY;
+    if (IsPressed(DownRight)) {
+      RightPlayer.y = RightPlayer.y + CymGame.padleDeltaMoveY;
+      if (RightPlayer.y > PadleMaxY) RightPlayer.y = PadleMaxY;
       CymGame.updateScreen = true;
     }
   }
@@ -134,14 +133,14 @@ void UpdateBallPosAndCheckForBandOrGoal(cymGameStruct& CymGame, cymBallStruct& B
     if ( Ball.isHeading == toLeft ) Ball.isHeading = (direction)random(1,3);
     if ( Ball.isHeading == toLeftUp ) Ball.isHeading = toRightUp;
     if ( Ball.isHeading == toLeftDown ) Ball.isHeading = toRightDown;
-    Ball.x = 4; 
+    Ball.x = 5; 
   }
   if (Ball.x >= FieldXmax-4) {
     CheckIfRightPlayerLostGoal(CymGame, Ball, LeftPlayer, RightPlayer);
     if ( Ball.isHeading == toRight ) Ball.isHeading = (direction)random(4,6);
     if ( Ball.isHeading == toRightUp ) Ball.isHeading = toLeftUp;
     if ( Ball.isHeading == toRightDown ) Ball.isHeading = toLeftDown;
-    Ball.x = FieldXmax-5;
+    Ball.x = FieldXmax-6;
   }
 }
 
@@ -153,9 +152,9 @@ int updateBallDyAfterPadleHit(int BallX, int BallY, int LeftPadleY, int RightPad
     padleHitDist = abs(BallY - RightPadleY);
   }
   if (padleHitDist < 2) {return 1;
-  } else if (padleHitDist < 4) {return 2;
-  } else if  (padleHitDist < 8) {return 3;
-  } else return 4;
+  } else if (padleHitDist < 6) {return 2;
+  } else if  (padleHitDist < 9) {return 3;
+  } else return 5;
 }
 
 
@@ -194,7 +193,6 @@ void HandleLostGoal(cymGameStruct& CymGame, cymBallStruct& Ball, cymPlayerStruct
     Ball.x = FieldXmax - 3;
   }
   DisplayGoal(Ball, LeftPlayer, RightPlayer);
-  // Rozpocznij po straconej bramce
   Ball.y = HalfFieldY;
   Ball.dY = updateBallDyAfterPadleHit(Ball.x, Ball.y, LeftPlayer.y, RightPlayer.y);
   DrawBall(Ball);
@@ -364,7 +362,6 @@ void updateBallYpos(cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerS
   }
 }
 
-
 bool itsTimeForPadlePosUpdate(cymGameStruct& CymGame) {
   unsigned long FinalUpdateRate = CymGame.playerPadlePosUpdateRate;
 
@@ -409,7 +406,7 @@ void DisplayGameSummary(cymGameStruct& CymGame, cymPlayerStruct& LeftPlayer, cym
       myOLED.print("AI Cie pokonal!");
     }
   } else if (CymGame.playersNo == 0) {
-    myOLED.print("To tylko demo!");
+    myOLED.print("To tylko demo ;)");
   }
   myOLED.display();
   delay(800);

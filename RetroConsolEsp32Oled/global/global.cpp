@@ -203,6 +203,62 @@ void CheckIfResetHighscores(){
   delay(1000);
  }
 
+const GameInfo HelpInfo = {
+  "Pomoc/info",
+  "opis obslugi konsoli",
+  DisplayHelpInfo
+};
+
+void DisplayHelpInfo() {
+  myOLED.clearDisplay();
+  myOLED.setTextSize(1);
+  //myOLED.setFont(&TomThumb);
+  for (int i=0; i<4; i++) {
+    char buffer[64];
+    const char* ptr = (const char*)pgm_read_ptr(&(teksty[i]));
+    strcpy_P(buffer, ptr);
+    myOLED.setCursor(0, 2+i*12);
+    myOLED.print(buffer);
+  }
+  myOLED.display();
+  delay(1000);
+  WaitforButton();
+  myOLED.clearDisplay();
+  for (int i=4; i<9; i++) {
+    char buffer[120];
+    const char* ptr = (const char*)pgm_read_ptr(&(teksty[i]));
+    strcpy_P(buffer, ptr);
+    myOLED.setCursor(0, 2+i*12-48);
+    myOLED.print(buffer);
+  }
+  myOLED.display();
+  WaitforButton();
+  delay(300);
+  myOLED.clearDisplay();
+   for (int i=4; i<9; i++) {
+    char buffer[120];
+    const char* ptr = (const char*)pgm_read_ptr(&(teksty[i]));
+    strcpy_P(buffer, ptr);
+    myOLED.setCursor(0, 2+i*12-48);
+    myOLED.print(buffer);
+  }
+  myOLED.display();
+  WaitforButton();
+  delay(500);
+  myOLED.clearDisplay();
+   for (int i=9; i<14; i++) {
+    char buffer[120];
+    const char* ptr = (const char*)pgm_read_ptr(&(teksty[i]));
+    strcpy_P(buffer, ptr);
+    myOLED.setCursor(0, 2+i*12-108);
+    myOLED.print(buffer);
+  }
+  myOLED.display();
+  WaitforButton();
+  delay(300);
+
+ }
+
 void SerialPrintFreeRam() {
   Serial.print("Wolna pamięć RAM: ");
   Serial.println(ESP.getFreeHeap());      // ilość wolnej pamięci heap (RAM)

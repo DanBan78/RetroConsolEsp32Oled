@@ -11,6 +11,7 @@ const GameInfo* allGames[] = {
     &GameInfo_Wilk,
     &GameInfo_SpaceShooter,
     &GameInfo_HackMe,
+    &HelpInfo,
 
     // Dodaj kolejne gry: &GameInfo_SpaceShooter, &GameInfo_Slalom, ...
   };
