@@ -93,6 +93,7 @@ const char* const teksty[] PROGMEM = { str0, str1, str2, str3, str4, str5, str6,
   btPressedCode ReadButton(void (*callback)(timerStruct&),timerStruct& t);
   bool IsPressed(btPressedCode button);
   bool CheckIfTimePassed(unsigned long& LastTimeCheckOneSec, unsigned long interval);
+  bool AllButtonsPressedCheck();
 
   void displayVar(int i);
   void DisplayHelpInfo();
@@ -130,4 +131,6 @@ const char* const teksty[] PROGMEM = { str0, str1, str2, str3, str4, str5, str6,
   #define DELAY100MS 100
   #define DELAY50MS 50
   #define DELAY1000MS 1000
+  #define DELAY1500MS 1500
+  #define DELAY2000MS 2000
 #endif

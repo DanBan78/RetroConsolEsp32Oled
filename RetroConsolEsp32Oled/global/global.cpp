@@ -3,21 +3,19 @@
 #include "gameSlalom/Slalom.cpp"
 #include "gameDino/Dino.cpp"
 #include "gameWilk/Wilk.cpp"
-#include "gameSpaceShooter/SpaceShooter.cpp"
+//#include "gameSpaceShooter/SpaceShooter.cpp"
 #include "gameHackMe/HackMe.cpp"
+
 
 Adafruit_SH1106G myOLED = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 
 bool soundEnabled = false;
-
 bool Debug = true;
 bool sounddone = false;
 bool pauseGame = false;
-
 int GameSpeed = 0;
 int GameSelected = 1;
-
 int score = 0;
 int SessionScore = 0;
 
@@ -44,6 +42,14 @@ btPressedCode ReadButton(void (*callback)(timerStruct&), timerStruct& t) {
   delay(10); // debounce
 
   return ButtonCode;
+}
+
+bool AllButtonsPressedCheck(){
+  if (IsPressed(UpLeft) && IsPressed(DownRight) && IsPressed(UpRight) && IsPressed(DownLeft)) {
+    delay(500);
+    return true;
+  }
+  return false;
 }
 
 bool IsPressed(btPressedCode button){
@@ -212,7 +218,6 @@ const GameInfo HelpInfo = {
 void DisplayHelpInfo() {
   myOLED.clearDisplay();
   myOLED.setTextSize(1);
-  //myOLED.setFont(&TomThumb);
   for (int i=0; i<4; i++) {
     char buffer[64];
     const char* ptr = (const char*)pgm_read_ptr(&(teksty[i]));

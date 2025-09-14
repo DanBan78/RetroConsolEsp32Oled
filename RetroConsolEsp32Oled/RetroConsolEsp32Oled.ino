@@ -9,7 +9,7 @@ const GameInfo* allGames[] = {
     &GameInfo_Slalom,
     &GameInfo_Dino,
     &GameInfo_Wilk,
-    &GameInfo_SpaceShooter,
+    //&GameInfo_SpaceShooter,
     &GameInfo_HackMe,
     &HelpInfo,
 
@@ -43,7 +43,6 @@ void setup() {
   CheckIfResetHighscores();
   delay(100);
   DisplayHighscores();
-  //SerialPrintFreeRam();
 }
 //####################################################################################
 void loop() {

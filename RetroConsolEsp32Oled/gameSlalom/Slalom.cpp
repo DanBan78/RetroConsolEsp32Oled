@@ -3,17 +3,17 @@
 #include "Slalom_private.h"
 
   SpriteCode NewRow_Array[4] = {FUEL,FUEL,FUEL,FUEL};
-
   SpriteCode Sprites_Array[6][4] = {{CLEAN, CLEAN, CLEAN, CLEAN}, 
                                     {CLEAN, CLEAN, CLEAN, CLEAN},
                                     {CLEAN, CLEAN, CLEAN, CLEAN},
                                     {CLEAN, CLEAN, CLEAN, CLEAN},
                                     {CLEAN, CLEAN, CLEAN, CLEAN}};
 
-  static int RowCode[14] = {1, 2, 4, 8, 3, 5, 6, 9, 10, 12, 7, 11, 13, 14};
 
-  int sprite_x[5][4] = {{23,42,61,80},{20,41,62,83},{17,40,63,86},{14,39,64,89},{4,34,63,92}};
-  int sprite_y[5] = {-4,4,13,27,40};
+  static const uint8_t RowCode[14] = {1, 2, 4, 8, 3, 5, 6, 9, 10, 12, 7, 11, 13, 14};
+
+  const int sprite_x[5][4] = {{23,42,61,80},{20,41,62,83},{17,40,63,86},{14,39,64,89},{4,34,63,92}};
+  const int sprite_y[5] = {-4,4,13,27,40};
   int LivesLeft;
   int GameLevel = 0;
   int FuelLevel = FuelInit;
@@ -73,26 +73,8 @@
       myOLED.drawLine(42,16, 45, 0, SH110X_WHITE);
       myOLED.display();
     }
-    int k=11;
-    if(random(0,5)>2)  myOLED.drawPixel(sprite_x[4][car_x-1]- k + f1_width, sprite_y[4]+ f1_height-1, SH110X_WHITE);
-    if(random(0,5)>3)  myOLED.drawPixel(sprite_x[4][car_x-1]- k-1+ f1_width, sprite_y[4]+ f1_height-2, SH110X_WHITE);
-    if(random(0,5)>2)  myOLED.drawPixel(sprite_x[4][car_x-1]- k+1+ f1_width, sprite_y[4]+ f1_height, SH110X_WHITE);
-    if(random(0,5)<4)  myOLED.drawPixel(sprite_x[4][car_x-1]- k+1+ f1_width, sprite_y[4]+ f1_height-1, SH110X_WHITE);
-    if(random(0,5)<2)  myOLED.drawPixel(sprite_x[4][car_x-1]- k-1+ f1_width, sprite_y[4]+ f1_height-2, SH110X_WHITE);
-    if(random(0,5)<3)  myOLED.drawPixel(sprite_x[4][car_x-1]- k-2+ f1_width, sprite_y[4]+ f1_height-1, SH110X_WHITE);
-
-    if(random(0,5)>1)  myOLED.drawPixel(sprite_x[4][car_x-1]- k -14 + f1_width, sprite_y[4]+ f1_height-1, SH110X_WHITE);
-    if(random(0,5)>2)  myOLED.drawPixel(sprite_x[4][car_x-1]- k -14 -1+ f1_width, sprite_y[4]+ f1_height-2, SH110X_WHITE);
-    if(random(0,5)>3)  myOLED.drawPixel(sprite_x[4][car_x-1]- k -14 +1+ f1_width, sprite_y[4]+ f1_height-1, SH110X_WHITE);
-    if(random(0,5)<2)  myOLED.drawPixel(sprite_x[4][car_x-1]- k -14 +1+ f1_width, sprite_y[4]+ f1_height-1, SH110X_WHITE);
-    if(random(0,5)<4)  myOLED.drawPixel(sprite_x[4][car_x-1]- k -14 -1+ f1_width, sprite_y[4]+ f1_height-2, SH110X_WHITE);
-    if(random(0,5)<2)  myOLED.drawPixel(sprite_x[4][car_x-1]- k -14 -2+ f1_width, sprite_y[4]+ f1_height-1, SH110X_WHITE);
-
-    if(random(0,5)<2)  myOLED.drawPixel(sprite_x[4][car_x-1]- k -8 +1+ f1_width, sprite_y[4]+ f1_height-3, SH110X_WHITE);
-    if(random(0,5)<4)  myOLED.drawPixel(sprite_x[4][car_x-1]- k -9 -1+ f1_width, sprite_y[4]+ f1_height-4, SH110X_WHITE);
-    if(random(0,5)<2)  myOLED.drawPixel(sprite_x[4][car_x-1]- k -10 -2+ f1_width, sprite_y[4]+ f1_height-3, SH110X_WHITE);
-    if(random(0,5)<2)  myOLED.drawPixel(sprite_x[4][car_x-1]- k -9 -1+ f1_width, sprite_y[4]+ f1_height-5, SH110X_WHITE);     
   }
+  
   void LivesLeftDisplay(int k) {
     myOLED.fillRect(114, 0, 128, 12, SH110X_BLACK);
     if (k>0) {
@@ -514,6 +496,18 @@
     if (Sprites_Array[3][3] == FUEL)  {Sprites_Array[2][3] = CLEAN;}
   }
 
+  void Pause(){
+    myOLED.setTextSize(1); 
+    myOLED.setCursor(40,28);
+    myOLED.print("PAUSE");
+    myOLED.display();
+    delay(500);
+    while(ReadButton(nullptr, Timer1Sec) == NONE);
+    myOLED.setCursor(40,28);
+    myOLED.print("     ");
+    myOLED.display();
+  }
+
 // //############################################
 
 void Game_Slalom() {
@@ -523,12 +517,13 @@ void Game_Slalom() {
     myOLED.clearDisplay();
     GameSlalomInit();
     myOLED.display();
-
-    Serial.print("ESP Init");
-    SerialPrintFreeRam();
+    GameOverSlalom = false;
 
     while (!GameOverSlalom){
       btn = ReadButton(nullptr, Timer1Sec);
+      if (btn == UpRight) {
+        Pause();
+      }
       if (btn == DownLeft && !btnActive) {
         if (car_x > 1) car_x--;
         btnActive = true;
@@ -551,12 +546,12 @@ void Game_Slalom() {
       CalculateGameSpeedAndLevel();
       myOLED.display();
       checkIfGameOver();
+      if (IsPressed(UpLeft) && IsPressed(DownLeft) &&
+          IsPressed(UpRight) && IsPressed(DownRight)) return; 
     }
     if (GameOverSlalom) GameOverSlalomDisplay();
     delay(1000);
-    GameOverSlalom = false;
     WaitforButton();
-    return;
   }
 }
 
