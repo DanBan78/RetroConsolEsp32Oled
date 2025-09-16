@@ -42,8 +42,7 @@
   #define PongRecord 12
 
 //  bool ActiveButton = false;
-  enum btPressedCode { UpLeft, DownRight, NONE, UpRight, DownLeft };
-
+  enum btPressedCode { UpLeft, DownRight, NONE, UpRight, DownLeft, ALL_BTN };
 
   typedef void (*GameLaunchFunc)();
 
@@ -93,7 +92,6 @@ const char* const teksty[] PROGMEM = { str0, str1, str2, str3, str4, str5, str6,
   btPressedCode ReadButton(void (*callback)(timerStruct&),timerStruct& t);
   bool IsPressed(btPressedCode button);
   bool CheckIfTimePassed(unsigned long& LastTimeCheckOneSec, unsigned long interval);
-  bool AllButtonsPressedCheck();
 
   void displayVar(int i);
   void DisplayHelpInfo();

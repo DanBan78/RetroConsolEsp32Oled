@@ -1,75 +1,82 @@
 #include "Dino.h"
 #include "Dino_private.h"
 
+  SpriteSetStr Skins[2] = {
+    {dino1, dino2, dino3, obst1, obst2, aero1, aero2, aero3, "Auuuc!!"},      // zestaw 1
+    {cat1, cat2, cat3, murek1, murek2, bird1, bird2, bird3, "Miau!"} // zestaw 2
+  };
 
   void Game_Dino() {
-    dGameStruct DinoGame;
-    dinoStruct Dino;
-    pteroStruct Ptero;
-    treeStruct tree1, tree2;
+    dGameStr DinoGame;
+    jumpStr Dino;
+    aeroStr Aero;
+    obstStr obst1, obst2;
+    score = 0;
+  
     while(true){
-      static const GameConstStruct GameConst = {
-        .StartTreeX = 120,
-        .NewTreeXInit = 160,
-        .minDeltaTrees = 10,
-        .baselineY = 54,
+      static const GameConstStr GameConst = {
+        .first_obst_x = 100,
+        .new_obst_x_init = 130,
+        .min_obst_dist = 10,
+        .baselineY = 60,
         .maxspeed = 20,
-        .tree_y = 35,
-        .dino_foodInit = 8,
-        .dino_baseX = 10,
-        .dino_baseY = 29,
-        .dino_xColRange = 3,
-        .dino_width = 25,
-        .dino_height = 26,
-        .dino_jumpHeight = 26,
-        .ptero_width = 16,
-        .ptero_height = 10,
-        .ptero_initY = 12};
+        .obst_y = 37,
+        .jumper_foodInit = 8,
+        .jumper_baseX = 10,
+        .jumper_baseY = 34,
+        .jumper_xColRange = 6,
+        .jumper_width = 25,
+        .jumper_height = 26,
+        .jumper_jumpHeight = 24,
+        .aero_width = 16,
+        .aero_height = 10,
+        .aero_initY = 12
+      };
       DinoGame.sessionScore = 0;
       Dino.colision = false;
 
-      IntroMessage();
+      DisplayWelcomeScreen();
       while (1) {
-        ReplayInitValues(DinoGame, Dino, Ptero, tree1, tree2, GameConst);
+        InitValuesAfterReplay(DinoGame, Dino, Aero, obst1, obst2, GameConst);
         WaitforButton();
-        RenderScene(DinoGame, Dino, tree1, tree2, GameConst);
+        FirstGameFrame(DinoGame, Dino, obst1, obst2, GameConst);
 
-        Play(DinoGame, Dino, Ptero, tree1, tree2, GameConst);
-        if (AllButtonsPressedCheck()) return;
-
-        displaySummary(DinoGame, Dino);
+        PlayGame(DinoGame, Dino, Aero, obst1, obst2, GameConst);
+        DisplayGameSummary(DinoGame, Dino);
         WaitforButton();
         break;
       }
     }
   }
 
-
 //####################################################################################
 
-void ReplayInitValues(dGameStruct& DinoGame, dinoStruct& Dino, pteroStruct& Ptero, treeStruct& tree1, treeStruct& tree2, const GameConstStruct& GameConst) {
-  Dino.y = GameConst.dino_baseY;
-  Dino.food = GameConst.dino_foodInit;
+void InitValuesAfterReplay(dGameStr& DinoGame, jumpStr& Dino, aeroStr& Aero, obstStr& obst1, obstStr& obst2, const GameConstStr& GameConst) {
+  Dino.y = GameConst.jumper_baseY;
+  Dino.food = GameConst.jumper_foodInit;
   Dino.state = true;
   Dino.jump = 0;
 
-  DinoGame.score = 0;
+  score = 0;
   DinoGame.speed = 0;
-  DinoGame.pause = false;
+  pauseGame = false;
 
-  tree1.x = GameConst.StartTreeX;
-  tree1.type = TREE_NARROW;
-  tree2.x = GameConst.NewTreeXInit;
-  tree2.type = TREE_WIDE;
+  obst1.x = GameConst.first_obst_x;
+  obst1.type = OBST_NARROW;
+  obst2.x = GameConst.new_obst_x_init;
+  obst2.type = OBST_WIDE;
 
-  Ptero.x = GameConst.NewTreeXInit;
-  Ptero.y = GameConst.ptero_initY;
-  Ptero.state = PteroUp;
-  Ptero.colission = false;
-};
+  Aero.x = GameConst.new_obst_x_init;
+  Aero.y = GameConst.aero_initY;
+  Aero.state = AeroUp;
+  Aero.colission = false;
+}
 
-void IntroMessage(){
+void DisplayWelcomeScreen(){
   myOLED.clearDisplay();
+  myOLED.setTextColor(SH110X_WHITE);
+  myOLED.setTextSize(1);
+
   myOLED.setTextColor(SH110X_WHITE);
   myOLED.setTextSize(2);
   myOLED.setCursor(10,5);
@@ -80,12 +87,12 @@ void IntroMessage(){
   myOLED.display();
 }
 
-void RenderScene(dGameStruct& DinoGame, dinoStruct& Dino, treeStruct& tree1, treeStruct& tree2, const GameConstStruct& GameConst) {
+void FirstGameFrame(dGameStr& DinoGame, jumpStr& Dino, obstStr& obst1, obstStr& obst2, const GameConstStr& GameConst) {
+
   myOLED.clearDisplay();
-  myOLED.drawBitmap(GameConst.dino_baseX, GameConst.dino_baseY, dino1, GameConst.dino_width, GameConst.dino_height, SH110X_WHITE);
-  // Rysuj drzewa przez moveTree, aby uniknąć błędu typów
-  moveTree(tree1, GameConst);
-  moveTree(tree2, GameConst);
+  myOLED.drawBitmap(GameConst.jumper_baseX, GameConst.jumper_baseY, dino1, GameConst.jumper_width, GameConst.jumper_height, SH110X_WHITE);
+  MoveTree(DinoGame, obst1, GameConst);
+  MoveTree(DinoGame, obst2, GameConst);
   myOLED.drawLine(0, GameConst.baselineY, 127, GameConst.baselineY, SH110X_WHITE);
   myOLED.setCursor(5, 8);
   myOLED.println("Dino jump, run!");
@@ -93,60 +100,60 @@ void RenderScene(dGameStruct& DinoGame, dinoStruct& Dino, treeStruct& tree1, tre
   delay(100);
 }
 
-void DisplayGameFrame( dGameStruct& DinoGame, dinoStruct& Dino, pteroStruct& Ptero, treeStruct& tree1, treeStruct& tree2, const GameConstStruct& GameConst) {
+void UpdateGameFrame( dGameStr& DinoGame, jumpStr& Dino, aeroStr& Aero, obstStr& obst1, obstStr& obst2, const GameConstStr& GameConst) {
   myOLED.clearDisplay();
-  displayScore(DinoGame, Dino);
+  DisplayScore(DinoGame, Dino);
   displaySound(soundEnabled);
+  if (Dino.food == 0) DisplayOutOfFoodInfo();
 
-  moveTree(tree1, GameConst);
-  moveTree(tree2, GameConst);
-  moveDino(Dino, GameConst);
-  movePtero(Ptero, GameConst);
+  MoveTree(DinoGame,obst1, GameConst);
+  MoveTree(DinoGame,obst2, GameConst);
+  MoveDino(DinoGame, Dino, GameConst);
+  MoveAero(DinoGame, Aero, GameConst);
   myOLED.drawLine(0, GameConst.baselineY, 127, GameConst.baselineY, SH110X_WHITE);
 }
 
-void OutOfFood(){
+void DisplayOutOfFoodInfo(){
   myOLED.setTextSize(1);
-  myOLED.setCursor(15,55);
+  myOLED.setCursor(15,20);
   myOLED.print("No Food - no jump!");
-  myOLED.display();
 }
 
 // Main play function
-void Play(dGameStruct& DinoGame, dinoStruct& Dino, pteroStruct& Ptero, treeStruct& tree1, treeStruct& tree2, const GameConstStruct& GameConst) {
+void PlayGame(dGameStr& DinoGame, jumpStr& Dino, aeroStr& Aero, obstStr& obst1, obstStr& obst2, const GameConstStr& GameConst) {
   while (true) {
     myOLED.clearDisplay();
-    if (AllButtonsPressedCheck()) return;
-    if (IsPressed(DownLeft) || IsPressed(DownRight)) {
-      if (Dino.jump==0) Dino.jump=1;
-    }
-    if (IsPressed(UpRight)) {
-      DinoGame.pause = true;
-      while (IsPressed(UpRight));
-    }
+    ButtonsActions(DinoGame, Dino);
 
-    if ((Dino.food == 0) && Dino.jump == 1) Dino.jump = 0;
-    if (Dino.jump != 0) DinoJump(DinoGame, Dino, GameConst);
-    DisplayGameFrame(DinoGame, Dino, Ptero, tree1, tree2, GameConst);
-    CheckPteroColision(DinoGame, Dino, Ptero, GameConst);
-    CalcTreesAnimations(DinoGame, tree1, tree2, GameConst);
-    CalcPteroAnimations(DinoGame, Ptero, GameConst);
+    if ((Dino.food == 0)){
+      if (Dino.jump == 1) Dino.jump = 0;
+    }
+    if (Dino.jump != 0) {
+      if (Dino.jumpType) {
+        JumpHigh(DinoGame, Dino, GameConst);
+      } else {
+        JumpLong(DinoGame, Dino, GameConst);
+      }
+    }
+    UpdateGameFrame(DinoGame, Dino, Aero, obst1, obst2, GameConst);
+    CheckIfAeroColision(DinoGame, Dino, Aero, GameConst);
+    CalcTreesXpos(DinoGame, obst1, obst2, GameConst);
+    CalcAeroXYpos(DinoGame, Aero, GameConst);
     CalcGameSpeed(DinoGame, GameConst);
-    if ((Dino.food == 0)) OutOfFood();
-    if (CheckCollision(DinoGame, Dino, tree1, GameConst) || CheckCollision(DinoGame, Dino, tree2, GameConst)) Dino.colision = true;
+    if (CheckIfTreeCollision(DinoGame, Dino, obst1, GameConst) || CheckIfTreeCollision(DinoGame, Dino, obst2, GameConst)) Dino.colision = true;
     if (Dino.colision) {
-      ColisionDetected(Dino, GameConst);
+      GameOverTreeColisionDetected(DinoGame, Dino, GameConst);
       myOLED.display();
       delay(50);
       return;
     }
     myOLED.display();
     delay(GameConst.maxspeed - DinoGame.speed);
-    if (DinoGame.pause) DinoGamePause();
+    if (pauseGame) GamePause();
   }
 }
   
-void DinoGamePause() {
+void GamePause() {
   myOLED.setTextSize(2);
   myOLED.setCursor(20,18);
   myOLED.print("PAUSE");
@@ -157,59 +164,85 @@ void DinoGamePause() {
   WaitforButton();
 }
 
-void ExtraSpeed(dGameStruct& DinoGame, bool direction, uint8_t* sprite) {
+void TurboSpeed(dGameStr& DinoGame, bool direction, int16_t* sprite) {
   if (direction) {
     (*sprite)++;
-    if (DinoGame.score >60) (*sprite)++;
-    if (DinoGame.score >100) (*sprite)++;
-    if (DinoGame.score >150) (*sprite)++;
+    if (score >60) (*sprite)++;
+    if (score >100) (*sprite)++;
+    if (score >150) (*sprite)++;
   } else {
     (*sprite)--;
-    if (DinoGame.score >60) (*sprite)--;
-    if (DinoGame.score >100) (*sprite)--;
-    if (DinoGame.score >150) (*sprite)--;
+    if (score >60) (*sprite)--;
+    if (score >100) (*sprite)--;
+    if (score >150) (*sprite)--;
   }
 }
 
-// Move dino function
-void moveDino(dinoStruct& Dino, const GameConstStruct& GameConst) {
-  if (Dino.jump == 0) {
-    if (Dino.state) {
-      myOLED.drawBitmap(GameConst.dino_baseX, Dino.y, dino1, GameConst.dino_width, GameConst.dino_height, SH110X_WHITE);
-    } else {
-      myOLED.drawBitmap(GameConst.dino_baseX, Dino.y, dino2, GameConst.dino_width, GameConst.dino_height, SH110X_WHITE);
-    }
-    Dino.state = !Dino.state;
+void MoveDino(dGameStr& DinoGame, jumpStr& Dino, const GameConstStr& GameConst) {
+  if (DinoGame.isRect) {
+    int dinoCenterX       = GameConst.jumper_baseX + GameConst.jumper_width/2;
+    int dinoColAreaStart  = dinoCenterX - GameConst.jumper_xColRange;
+    int dinoColAreaWidth  = 2*GameConst.jumper_xColRange;
+    int dinoTop           = Dino.y;
+    int dinoBottom        = GameConst.jumper_height;
+    myOLED.fillRect(dinoColAreaStart, dinoTop, dinoColAreaWidth, dinoBottom, SH110X_WHITE);
   } else {
-    myOLED.drawBitmap(GameConst.dino_baseX, Dino.y, dino1, GameConst.dino_width, GameConst.dino_height, SH110X_WHITE);
-  }
-}
-// Move ptero function
-void movePtero(pteroStruct& Ptero, const GameConstStruct& GameConst) {
-  if (!Ptero.colission) {
-    if (random(0,2) == 1) {
-        myOLED.drawBitmap(Ptero.x, Ptero.y, ptero1, GameConst.ptero_width, GameConst.ptero_height, SH110X_WHITE);
+    if (Dino.jump == 0) {
+      if (Dino.state) {
+        myOLED.drawBitmap(GameConst.jumper_baseX, Dino.y, Skins[DinoGame.spriteSetIndex].Jumper1, GameConst.jumper_width, GameConst.jumper_height, SH110X_WHITE);
+      } else {
+        myOLED.drawBitmap(GameConst.jumper_baseX, Dino.y, Skins[DinoGame.spriteSetIndex].Jumper2, GameConst.jumper_width, GameConst.jumper_height, SH110X_WHITE);
+      }
+      Dino.state = !Dino.state;
     } else {
-      myOLED.drawBitmap(Ptero.x, Ptero.y, ptero2, GameConst.ptero_width, GameConst.ptero_height, SH110X_WHITE);
+      myOLED.drawBitmap(GameConst.jumper_baseX, Dino.y, Skins[DinoGame.spriteSetIndex].Jumper3, GameConst.jumper_width, GameConst.jumper_height, SH110X_WHITE);
     }
-  } else {
-    myOLED.drawBitmap(Ptero.x, Ptero.y, ptero3, GameConst.ptero_width, GameConst.ptero_height, SH110X_WHITE);
-  }
-}
-// Move tree funciton
-void moveTree(treeStruct& tree, const GameConstStruct& GameConst) {
-  if(tree.type==TREE_NARROW){
-    myOLED.drawBitmap(tree.x, GameConst.tree_y, tree1, TreeParams[TREE_NARROW].width, TreeParams[TREE_NARROW].height, SH110X_WHITE);
-  }
-  else if(tree.type==TREE_WIDE){
-    myOLED.drawBitmap(tree.x, GameConst.tree_y, tree2, TreeParams[TREE_WIDE].width, TreeParams[TREE_WIDE].height, SH110X_WHITE);
   }
 }
 
-void ColisionDetected(dinoStruct& Dino, const GameConstStruct& GameConst) {
+void MoveAero(dGameStr& DinoGame, aeroStr& Aero, const GameConstStr& GameConst) {
+  if (DinoGame.isRect) {
+    int AeroColAreaStart   = Aero.x;
+    int AeroColAreaWidth  = GameConst.aero_width;
+    int AeroTop    = Aero.y;
+    int AeroBottom = GameConst.aero_height;
+    myOLED.fillRect(AeroColAreaStart, AeroTop, AeroColAreaWidth, AeroBottom, SH110X_WHITE);
+    if(Aero.colission) Aero.y+=4;
+    return;
+  } else {
+    if (!Aero.colission) {
+      if (random(0,2) == 1) {
+        myOLED.drawBitmap(Aero.x, Aero.y, Skins[DinoGame.spriteSetIndex].Aero1, GameConst.aero_width, GameConst.aero_height, SH110X_WHITE);
+      } else {
+        myOLED.drawBitmap(Aero.x, Aero.y, Skins[DinoGame.spriteSetIndex].Aero2, GameConst.aero_width, GameConst.aero_height, SH110X_WHITE);
+      }
+    } else {
+      Aero.y+=4;
+      myOLED.drawBitmap(Aero.x, Aero.y, Skins[DinoGame.spriteSetIndex].Aero3, GameConst.aero_width, GameConst.aero_height, SH110X_WHITE);
+    }
+  }
+}
+
+void MoveTree(dGameStr& DinoGame, obstStr& tree, const GameConstStr& GameConst) {
+  int treeCenterX       = tree.x + ObstParams[tree.type].width / 2;
+  int treeColAreaStart  = treeCenterX - ObstParams[tree.type].xColisionRange;
+  int treeColAreaWidth  = 2 * ObstParams[tree.type].xColisionRange;
+  int treeTop           = GameConst.baselineY - ObstParams[tree.type].yColisionRange;
+  int treeHeight        = ObstParams[tree.type].yColisionRange;
+
+  if (DinoGame.isRect) {
+    if(tree.type==OBST_NARROW) myOLED.fillRect(treeColAreaStart, treeTop, treeColAreaWidth, treeHeight, SH110X_WHITE);
+    if(tree.type==OBST_WIDE) myOLED.fillRect(treeColAreaStart, treeTop, treeColAreaWidth, treeHeight, SH110X_WHITE);
+  } else {
+    if(tree.type==OBST_NARROW) myOLED.drawBitmap(tree.x, GameConst.obst_y, Skins[DinoGame.spriteSetIndex].ObstHigh, ObstParams[OBST_NARROW].width, ObstParams[OBST_NARROW].height, SH110X_WHITE);
+    if(tree.type==OBST_WIDE) myOLED.drawBitmap(tree.x, GameConst.obst_y, Skins[DinoGame.spriteSetIndex].ObstWide, ObstParams[OBST_WIDE].width, ObstParams[OBST_WIDE].height, SH110X_WHITE);
+  }
+}
+
+void GameOverTreeColisionDetected(dGameStr& DinoGame, jumpStr& Dino, const GameConstStr& GameConst) {
   myOLED.setTextSize(1);
-  myOLED.setCursor((GameConst.dino_baseX + GameConst.dino_width + 4), Dino.y-4);
-  myOLED.println("Auuuc!!");
+  myOLED.setCursor((GameConst.jumper_baseX + GameConst.jumper_width + 4), Dino.y-4);
+  myOLED.println(Skins[DinoGame.spriteSetIndex].collisionText);
   myOLED.display();
   if(soundEnabled){
     tone(BUZZER_PIN,TON_PUNKT_CZAS,DELAY100MS);
@@ -225,136 +258,164 @@ void ColisionDetected(dinoStruct& Dino, const GameConstStruct& GameConst) {
   myOLED.clearDisplay();
 }
 
-void CheckPteroColision(dGameStruct& DinoGame, dinoStruct& Dino, pteroStruct& Ptero, const GameConstStruct& GameConst) {
-  if ((Ptero.x < GameConst.dino_baseX + GameConst.dino_xColRange) &&
-   !(GameConst.dino_baseX - GameConst.dino_xColRange < Ptero.x + GameConst.ptero_width) &&
-     (Ptero.y + GameConst.ptero_height > Dino.y) && !Ptero.colission) {
-    Ptero.colission = true;
+void CheckIfAeroColision(dGameStr& DinoGame, jumpStr& Dino, aeroStr& Aero, const GameConstStr& GameConst) {
+  if ((((Aero.x < GameConst.jumper_baseX + GameConst.jumper_xColRange) ||
+      (Aero.x + GameConst.aero_width < GameConst.jumper_baseX - GameConst.jumper_xColRange) ) &&
+      (Aero.y + GameConst.aero_height > Dino.y)) && !Aero.colission) {
+    Aero.colission = true;
     Dino.food = Dino.food + 5;
     if(soundEnabled) {   
       tone(BUZZER_PIN,TON_PUNKT_FREQ,DELAY100MS);
-      delay(DELAY100MS);
       tone(BUZZER_PIN,TON_PUNKT_FREQ,DELAY100MS);
-      delay(DELAY100MS);
       noTone(BUZZER_PIN);
-    } else delay(DELAY250MS);
+    } else delay(DELAY50MS);
   }
-  if ((Ptero.colission) && ((Ptero.y>64)||(Ptero.x< -30))) {
-    Ptero.colission = false;
-    Ptero.x = GameConst.NewTreeXInit + random(0,40);
-    Ptero.y = GameConst.ptero_initY + random(-5,6);
+  if ((Aero.colission) && ((Aero.y>64)||(Aero.x< -30))) {
+    Aero.colission = false;
+    Aero.x = GameConst.new_obst_x_init + random(0,40);
+    Aero.y = GameConst.aero_initY + random(-5,6);
   }
 }
 
-void DinoJump(dGameStruct& DinoGame, dinoStruct& Dino, const GameConstStruct& GameConst) {
-	if(Dino.jump == 1){
-		if (soundEnabled) {
-			  tone(BUZZER_PIN,TON_ODLICZANIE_FREQ,DELAY100MS);
-			delay(50);
-			tone(BUZZER_PIN,TON_PUNKT_CZAS,DELAY100MS);
-      delay(50);
-      noTone(BUZZER_PIN);
-    }
-    Dino.y-=2;
-    ExtraSpeed(DinoGame,false, &Dino.y);
 
-    if(Dino.y <= (GameConst.dino_baseY-GameConst.dino_jumpHeight)){
-      Dino.y = (GameConst.dino_baseY-GameConst.dino_jumpHeight);
+void JumpLong(dGameStr& DinoGame, jumpStr& Dino, const GameConstStr& GameConst) {
+	if(Dino.jump == 1){
+    Dino.jumpStartX = 0;
+		if (soundEnabled && !sounddone) void JumpSound();
+    Dino.y-=3;
+    TurboSpeed(DinoGame,false, &Dino.y);
+
+    if(Dino.y < (GameConst.jumper_baseY-GameConst.jumper_jumpHeight/2)){
+      Dino.y = (GameConst.jumper_baseY-GameConst.jumper_jumpHeight/2);
       Dino.food--;
       Dino.jump = 2;
     }
   } else if (Dino.jump==2){
-    Dino.y+=2;
-     ExtraSpeed(DinoGame,true, &Dino.y);
-    if (Dino.y >= GameConst.dino_baseY){
-      Dino.y = GameConst.dino_baseY;
-      Dino.jump = 0; 
+    Dino.jumpStartX += 1;
+    if (Dino.jumpStartX > 10)  Dino.jump = 3;
+  } else if (Dino.jump==3){
+    Dino.y+=3;
+      TurboSpeed(DinoGame,true, &Dino.y);
+    if (Dino.y >= GameConst.jumper_baseY){
+      Dino.y = GameConst.jumper_baseY;
+      Dino.jump = 0;
+      Dino.jumpStartX = 0;
+      sounddone = false;
       score++;
     }
   }
 }
 
-bool CheckCollision(dGameStruct& DinoGame, dinoStruct& Dino, treeStruct& tree, const GameConstStruct& GameConst) {
-    int dinoLeft   = GameConst.dino_baseX;
-    int dinoRight  = GameConst.dino_baseX + GameConst.dino_width;
-    int dinoTop    = Dino.y;
-    int dinoBottom = Dino.y + GameConst.dino_height;
+void JumpHigh(dGameStr& DinoGame, jumpStr& Dino, const GameConstStr& GameConst) {
+	if(Dino.jump == 1){
+    Dino.jumpStartX = 0;
+		if (soundEnabled && !sounddone) void JumpSound();
+    Dino.y-=6;
+    TurboSpeed(DinoGame,false, &Dino.y);
 
-    int treeLeft   = tree.x;
-    int treeRight  = tree.x + TreeParams[tree.type].width;
-    int treeTop    = GameConst.baselineY - TreeParams[tree.type].height; // zwykle 35
-    int treeBottom = GameConst.baselineY;
-
-    bool overlapX = dinoRight > treeLeft && dinoLeft < treeRight;
-    bool overlapY = dinoBottom > treeTop && dinoTop < treeBottom;
-
-    return overlapX && overlapY;
-}
-
-void CalcTreesAnimations (dGameStruct& DinoGame, treeStruct& tree1, treeStruct& tree2, const GameConstStruct& GameConst) {
-  int treedist = abs(tree2.x-tree1.x);
-  //displayVar(treedist);
-	tree1.x-=2;
-  ExtraSpeed(DinoGame,false, &tree1.x);
-	tree2.x-=2;
-	ExtraSpeed(DinoGame,false, &tree2.x);
-
-	if (tree1.x<-10) {
-		tree1.x = GameConst.NewTreeXInit + random(0,  0);
-		if (random(0,2)==1) {
-			tree1.type =  true;
-		} else tree1.type = false;
-	}
-	if (tree2.x<-10) {
-		tree2.x = GameConst.NewTreeXInit + random(0,20);
-		if (random(0,2)==1) {
-			tree2.type = true;
-		} else tree2.type = false;
-	}
-	if (treedist > 8 && treedist < 20) {
-		if (tree2.x > tree1.x) {
-			tree2.x = tree2.x + 30;
-		} else tree1.x = tree1.x + 30;
-	}       
-  //displayVar(treedist);
-}
-
-void CalcPteroAnimations(dGameStruct& DinoGame, pteroStruct& Ptero, const GameConstStruct& GameConst) {
-	int dir_y = random(0, 2);
-	if (!Ptero.colission) {
-		Ptero.x = Ptero.x - random(2,6);
-		if (dir_y == 0) {
-			Ptero.y = Ptero.y + random(0,4);
-		} else {
-		  Ptero.y = Ptero.y - random  (0,4);
-		}	
-		if (Ptero.y > 22) Ptero.y = 18;
-		if (Ptero.y < 1) Ptero.y = 2;
-		else {
-			Ptero.y += 2;
-			Ptero.x = Ptero.x - 3;
-		}
-
-    if ((Ptero.x < 0 - GameConst.ptero_width) || (Ptero.y < 0)) {
-      Ptero.x = GameConst.NewTreeXInit + random(0,80);
-      Ptero.y = (GameConst.ptero_initY);
-      Ptero.colission = false;
+    if(Dino.y < (GameConst.jumper_baseY-GameConst.jumper_jumpHeight)){
+      Dino.y = (GameConst.jumper_baseY-GameConst.jumper_jumpHeight);
+      Dino.food--;
+      Dino.jump = 2;
+    }
+  } else if (Dino.jump==2){
+    Dino.jumpStartX += 1;
+    if (Dino.jumpStartX > 7)  Dino.jump = 3;
+  } else if (Dino.jump==3){
+    Dino.y+=9;
+      TurboSpeed(DinoGame,true, &Dino.y);
+    if (Dino.y >= GameConst.jumper_baseY){
+      Dino.y = GameConst.jumper_baseY;
+      Dino.jump = 0;
+      Dino.jumpStartX = 0;
+      sounddone = false;
+      score++;
     }
   }
 }
 
-void CalcGameSpeed(dGameStruct& DinoGame, const GameConstStruct& GameConst) {
-	DinoGame.speed = DinoGame.score/3;
+
+bool CheckIfTreeCollision(dGameStr& DinoGame, jumpStr& Dino, obstStr& tree, const GameConstStr& GameConst) {
+  int dinoCenter        = GameConst.jumper_baseX + GameConst.jumper_width/2;
+  int dinoColAreaStart  = dinoCenter - GameConst.jumper_xColRange;
+  int dinoColAreaWidth  = 2 * GameConst.jumper_xColRange;
+  int dinoTop           = Dino.y;
+  int dinoBottom        = Dino.y + GameConst.jumper_height;
+  int treeCenter        = tree.x + ObstParams[tree.type].width/2;
+  int treeColAreaStart  = treeCenter - ObstParams[tree.type].xColisionRange;
+  int treeColAreaWidth  = 2 * ObstParams[tree.type].xColisionRange;
+  int treeTop           = GameConst.baselineY-ObstParams[tree.type].yColisionRange; 
+  int treeHeight        = ObstParams[tree.type].yColisionRange;
+
+  bool overlapX = (dinoColAreaStart + dinoColAreaWidth > treeColAreaStart) &&
+                  (dinoColAreaStart < treeColAreaStart + treeColAreaWidth);
+  bool overlapY = dinoBottom > treeTop;
+
+  return overlapX && overlapY;
+}
+
+void CalcTreesXpos (dGameStr& DinoGame, obstStr& obst1, obstStr& obst2, const GameConstStr& GameConst) {
+  int aerodist = abs(obst2.x-obst1.x);
+  //displayVar(aerodist);
+	obst1.x-=2;
+  TurboSpeed(DinoGame,false, &obst1.x);
+	obst2.x-=2;
+	TurboSpeed(DinoGame,false, &obst2.x);
+
+	if (obst1.x<-ObstParams[obst1.type].xColisionRange) {
+		obst1.x = GameConst.new_obst_x_init + random(0,20);
+		if (random(0,2)==1) {
+			obst1.type =  true;
+		} else obst1.type = false;
+	}
+	if (obst2.x<-ObstParams[obst2.type].xColisionRange) {
+		obst2.x = GameConst.new_obst_x_init + random(0,20);
+		if (random(0,2)==1) {
+			obst2.type = true;
+		} else obst2.type = false;
+	}
+	if (aerodist < 50) {
+		if (obst2.x > obst1.x) {
+			obst2.x = obst2.x + 45;
+		} else obst1.x = obst1.x + 45;
+	}    
+}
+
+void CalcAeroXYpos(dGameStr& DinoGame, aeroStr& Aero, const GameConstStr& GameConst) {
+	int dir_y = random(0, 2);
+	if (!Aero.colission) {
+		Aero.x = Aero.x - random(2,6);
+		if (dir_y == 0) {
+			Aero.y = Aero.y + random(0,4);
+		} else {
+		  Aero.y = Aero.y - random  (0,4);
+		}	
+		if (Aero.y > 20) Aero.y = 18;
+		if (Aero.y < 1) Aero.y = 2;
+  } else {
+		Aero.y += 2;
+		Aero.x = Aero.x - 5;
+	}
+
+  if ((Aero.x < 0 - GameConst.aero_width) || (Aero.y < 0)) {
+    Aero.x = GameConst.new_obst_x_init + random(30,100);
+    Aero.y = (GameConst.aero_initY);
+    Aero.colission = false;
+  }
+}
+
+void CalcGameSpeed(dGameStr& DinoGame, const GameConstStr& GameConst) {
+	DinoGame.speed = score/3;
   if (DinoGame.speed > GameConst.maxspeed) DinoGame.speed = GameConst.maxspeed;
 }
 
-void ShowScore(dGameStruct& DinoGame){
-  if ((DinoGame.score > DinoGame.sessionScore)) {
-    DinoGame.sessionScore = DinoGame.score;
+void ShowScore(dGameStr& DinoGame){
+  if ((score > DinoGame.sessionScore)) {
+    DinoGame.sessionScore = score;
   }
   myOLED.setCursor(1,4);
   myOLED.print("Your score:   ");
-  myOLED.print(DinoGame.score);
+  myOLED.print(score);
   myOLED.setCursor(1,20);
   myOLED.print("Session best:  ");
   myOLED.print(DinoGame.sessionScore);
@@ -367,7 +428,7 @@ void ShowScore(dGameStruct& DinoGame){
 }
 
 // Game over display with score
-void displaySummary(dGameStruct& DinoGame, dinoStruct& Dino) {
+void DisplayGameSummary(dGameStr& DinoGame, jumpStr& Dino) {
   myOLED.clearDisplay();
   myOLED.setTextSize(2);
   myOLED.setCursor(10,20);
@@ -379,9 +440,9 @@ void displaySummary(dGameStruct& DinoGame, dinoStruct& Dino) {
 
   int highscore;
   EEPROM.get(DinoRecord, highscore);
-  DinoGame.score = DinoGame.score + Dino.food;
-  if ((DinoGame.score > highscore)) {
-    EEPROM.put(DinoRecord, DinoGame.score);
+  score = score + Dino.food;
+  if ((score > highscore)) {
+    EEPROM.put(DinoRecord, score);
     EEPROM.commit();
   }
 
@@ -394,16 +455,50 @@ void displaySummary(dGameStruct& DinoGame, dinoStruct& Dino) {
 }
 
 // Display score while running the game
-void displayScore(dGameStruct& DinoGame, dinoStruct& Dino) {
+void DisplayScore(dGameStr& DinoGame, jumpStr& Dino) {
   myOLED.setCursor(1,2);
   myOLED.print("food ");
   myOLED.print(Dino.food);
   myOLED.setCursor(61,2);
   myOLED.print("Jump: ");
-  myOLED.print(DinoGame.score);
+  myOLED.print(score);
 }
 
+void JumpSound(){
+  if (soundEnabled && !sounddone) {
+    tone(BUZZER_PIN,TON_ODLICZANIE_FREQ,DELAY100MS);
+    delay(50);
+    tone(BUZZER_PIN,TON_PUNKT_CZAS,DELAY100MS);
+    delay(50);
+    noTone(BUZZER_PIN);
+    sounddone = true;
+  }
+}
 
+void ButtonsActions(dGameStr& DinoGame, jumpStr& Dino) {
+  if(IsPressed(UpLeft)) {
+    DinoGame.spriteSetIndex++;
+    if (DinoGame.spriteSetIndex > 1){
+      DinoGame.spriteSetIndex = 0;
+    } 
+    while(IsPressed(UpLeft));
+  }
+
+  if (IsPressed(DownLeft)) {
+    if (Dino.jump==0) Dino.jump=1;
+    Dino.jumpType = true; // true - high jump
+  }
+
+  if (IsPressed(DownRight)) {
+    if (Dino.jump==0) Dino.jump=1;
+    Dino.jumpType = false; // false - long jump
+  }
+
+  if (IsPressed(UpRight)) {
+    pauseGame = !pauseGame;
+    while (IsPressed(UpRight));
+  }
+}
 
 const GameInfo GameInfo_Dino = {
   "Dino",

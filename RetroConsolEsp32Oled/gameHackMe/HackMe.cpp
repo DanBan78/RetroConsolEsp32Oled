@@ -21,7 +21,6 @@ void Game_HackMe() {
       initGameParameters(HackMeGame, Timer1Sec);
     } else GameRestart(HackMeGame);
     while(true) {
-      if (AllButtonsPressedCheck()) return; // natychmiastowy powrót do menu głównego
       displaySound();
       if (FirstDigitIsWrong(HackMeGame,Timer1Sec)) break;
       if (SecondDigitIsWrong(HackMeGame,Timer1Sec)) break;
@@ -224,12 +223,11 @@ bool FirstDigitIsWrong(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
     while (ReadButton(Timer_Interrupt, Timer1Sec) == NONE) {
       ReadButton(Timer_Interrupt, Timer1Sec);
       if (checkForTimeoutAndDisplayCurrTime(Timer1Sec)) return true;
-      if (AllButtonsPressedCheck()) return true;
     }
     button = ReadButton(Timer_Interrupt, Timer1Sec);
     while (ReadButton(Timer_Interrupt, Timer1Sec) != NONE); // czekaj na puszczenie przycisku
 
-    switch (button){
+    switch (button) {
       case UpLeft:
         if (HackMeGame.SelectedCol == 0) break;
         HackMeGame.SelectedCol--;
@@ -265,7 +263,6 @@ bool SecondDigitIsWrong(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
     while (ReadButton(Timer_Interrupt, Timer1Sec) == NONE) {
       ReadButton(Timer_Interrupt, Timer1Sec);
       if (checkForTimeoutAndDisplayCurrTime(Timer1Sec)) return true;
-      if (AllButtonsPressedCheck()) return true;
     }
     button = ReadButton(Timer_Interrupt, Timer1Sec);;
     switch (button){
@@ -303,11 +300,10 @@ bool ThirdDigitIsWrong(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
     int selectedCol = HackMeGame.SelectedCol;
     btPressedCode button;
     while (ReadButton(Timer_Interrupt, Timer1Sec) == NONE) {
-      ReadButton(Timer_Interrupt, Timer1Sec);; // czekaj na wciśnięcie przycisku
+      ReadButton(Timer_Interrupt, Timer1Sec);
       if (checkForTimeoutAndDisplayCurrTime(Timer1Sec)) return true;
-      if (AllButtonsPressedCheck()) return true;
     }
-    button = ReadButton(Timer_Interrupt, Timer1Sec);;
+    button = ReadButton(Timer_Interrupt, Timer1Sec);
     switch (button){
       case UpLeft:
         if (HackMeGame.SelectedCol == 0) break;
@@ -342,12 +338,11 @@ bool FourthDigitIsWrong(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
 
     btPressedCode button;
     while (ReadButton(Timer_Interrupt, Timer1Sec) == NONE) {
-      ReadButton(Timer_Interrupt, Timer1Sec);; // czekaj na wciśnięcie przycisku
+      ReadButton(Timer_Interrupt, Timer1Sec);
       if (checkForTimeoutAndDisplayCurrTime(Timer1Sec)) return true;
-      if (AllButtonsPressedCheck()) return true;
     }
-    button = ReadButton(Timer_Interrupt, Timer1Sec);;
-       switch (button){
+    button = ReadButton(Timer_Interrupt, Timer1Sec);
+    switch (button){
       case UpLeft:
         if (HackMeGame.SelectedRow == 0) break;
         HackMeGame.SelectedRow--;
@@ -416,17 +411,15 @@ void displayResolution(HackMeStruct& HackMeGame) {
       myOLED.setTextColor(SH110X_WHITE, SH110X_BLACK);
       myOLED.setCursor(98, 11+11*znakIndex);
       myOLED.print(CodeChars[HackMeGame.GameMatrix[row][col]]);
-      //myOLED.setTextColor(SH110X_WHITE);
       myOLED.display();
       delay(300);
-      // Wyłączenie podświetlenia (czarny znak na czarnym tle w tablicy, białe tło z boku)
+      // Wyłączenie podświetlenia (czarny znak na czarnym tle w tablicy)
       myOLED.setTextColor(SH110X_WHITE, SH110X_BLACK);
       myOLED.setCursor(3+14*col, 11*row);
       myOLED.print(CodeChars[HackMeGame.GameMatrix[row][col]]);
       myOLED.setTextColor(SH110X_WHITE, SH110X_BLACK);
       myOLED.setCursor(98, 11+11*znakIndex);
       myOLED.print(CodeChars[HackMeGame.GameMatrix[row][col]]);
-      //myOLED.setTextColor(SH110X_WHITE);
       myOLED.display();
       delay(200);
     }
@@ -483,8 +476,6 @@ void GenerateRandomCodeMatrix(HackMeStruct& HackMeGame) {
     myOLED.display();
   }
   while (ReadButton(nullptr, Timer1Sec) != DownRight) {
-  if (AllButtonsPressedCheck()) return;
-
     myOLED.clearDisplay();
     randomMatrix(HackMeGame);
     displayMatrix(HackMeGame);
@@ -521,11 +512,8 @@ bool checkForTimeoutAndDisplayCurrTime(timerStruct& Timer1Sec) {
   int lineEnd = lineStart - Timer1Sec.currTime;
   myOLED.drawLine(120, lineStart, 120, lineStart-timeForCodeBreaking, SH110X_BLACK);
 
-  // Zamaluj poprzednią gwiazdkę (czarny prostokąt 6x8 px)
   myOLED.fillRect(118, lineEnd, 6, 6, SH110X_BLACK);
-  // Rysuj białą linię od góry do aktualnej pozycji
   myOLED.drawLine(120, lineStart, 120, lineEnd, SH110X_WHITE);
-  // Rysuj gwiazdkę na końcu białej linii
   myOLED.setTextColor(SH110X_WHITE);
   myOLED.setCursor(116, 0);
   myOLED.fillRect(110, 0, 20, 20, SH110X_BLACK);

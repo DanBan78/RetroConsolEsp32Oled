@@ -9,7 +9,6 @@
 
 Adafruit_SH1106G myOLED = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-
 bool soundEnabled = false;
 bool Debug = true;
 bool sounddone = false;
@@ -24,15 +23,19 @@ timerStruct Timer1Sec = {false, DELAY1000MS, 0, 0};
 void displayVar(int i) {
 	//myOLED.clearDisplay();
   myOLED.setTextColor(SH110X_WHITE);
-  myOLED.fillRect(10, 35, 26, 26, SH110X_BLACK);
-  myOLED.setTextSize(2);
-  myOLED.setCursor(10,35);
+  myOLED.fillRect(100, 10, 26, 26, SH110X_BLACK);
+  myOLED.setTextSize(1);
+  myOLED.setCursor(100,11);
   myOLED.print(i);
   //myOLED.display();
 }
 
 btPressedCode ReadButton(void (*callback)(timerStruct&), timerStruct& t) {
   btPressedCode ButtonCode = NONE;
+  if (digitalRead(BTN_1) == LOW && digitalRead(BTN_0) == LOW && digitalRead(BTN_3) == LOW && digitalRead(BTN_4) == LOW) {
+    ESP.restart();
+    return ButtonCode;
+  }
   if  (digitalRead(BTN_1) == LOW) ButtonCode = DownLeft;
   if  (digitalRead(BTN_0) == LOW) ButtonCode = UpLeft;
   if  (digitalRead(BTN_3) == LOW) ButtonCode = DownRight;
@@ -44,29 +47,26 @@ btPressedCode ReadButton(void (*callback)(timerStruct&), timerStruct& t) {
   return ButtonCode;
 }
 
-bool AllButtonsPressedCheck(){
-  if (IsPressed(UpLeft) && IsPressed(DownRight) && IsPressed(UpRight) && IsPressed(DownLeft)) {
-    delay(500);
-    return true;
-  }
-  return false;
-}
-
 bool IsPressed(btPressedCode button){
-   delay(10); // debounce
-   switch(button) {
-     case DownLeft:
-       if (digitalRead(BTN_1) == LOW) return true;
-       break;
-     case UpLeft:
-       if (digitalRead(BTN_0) == LOW) return true;
-       break;
-     case DownRight:
-       if (digitalRead(BTN_3) == LOW) return true;
-       break;
-     case UpRight:
-       if (digitalRead(BTN_4) == LOW) return true;
-       break;
+  delay(10); // debounce
+  if (digitalRead(BTN_1) == LOW && 
+      digitalRead(BTN_0) == LOW && 
+      digitalRead(BTN_3) == LOW && 
+      digitalRead(BTN_4) == LOW) ESP.restart();
+
+  switch(button) {
+    case DownLeft:
+      if (digitalRead(BTN_1) == LOW) return true;
+      break;
+    case UpLeft:
+      if (digitalRead(BTN_0) == LOW) return true;
+      break;
+    case DownRight:
+      if (digitalRead(BTN_3) == LOW) return true;
+      break;
+    case UpRight:
+      if (digitalRead(BTN_4) == LOW) return true;
+      break;
    }
   return false;
 }
@@ -83,13 +83,14 @@ void WelcomeScreen() {
   myOLED.setTextColor(SH110X_WHITE);
   myOLED.clearDisplay();
   myOLED.display();
-  myOLED.setTextSize(2);
+  myOLED.setTextSize(1);
   myOLED.setCursor(10,20);
-  myOLED.print("ArduGame");
+  myOLED.print("RetroConsolEsp");
   myOLED.setTextSize(1);
   myOLED.setCursor(60,50);
   myOLED.print("dla Filipa");
   myOLED.display();
+  delay(500);
 }
 
 int GameSelectMenu() {
@@ -176,7 +177,7 @@ void displaySound2(bool sound){
   }
 }
 void CheckIfResetHighscores(){
-  if (IsPressed(UpLeft) && IsPressed(DownRight) && IsPressed(UpRight) && IsPressed(DownLeft)) {
+  if (IsPressed(UpLeft) && IsPressed(UpRight) && IsPressed(DownLeft)) {
     int reset = 0;
     EEPROM.put(WolfRecord, reset);
     EEPROM.put(SlalomRecord, reset);

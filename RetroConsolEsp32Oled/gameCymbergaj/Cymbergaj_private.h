@@ -6,7 +6,7 @@
     #define FieldXmax 126
     #define FieldYmax 62
     #define  deltaX 4
-    #define CYM_MENU_ROW_MAX 4
+    #define CYM_MENU_ROW_MAX 3
 
     extern const GameInfo* allGames[] ; 
     enum direction {toRight=0, toRightDown, toRightUp, toLeft, toLeftDown, toLeftUp};
@@ -52,19 +52,17 @@
         const int deltaY = 11;
         const int rowMax = CYM_MENU_ROW_MAX;
         const int optionsInRow =  sizeof(rowOptionSelect)/sizeof(rowOptionSelect[0]);
-        const String optionString[CYM_MENU_ROW_MAX][CYM_MENU_ROW_MAX] =  {
+        const String optionString[CYM_MENU_ROW_MAX][CYM_MENU_ROW_MAX+1] =  {
             { "Tryb: ", "1 gracz", "2 graczy", "demo", }, 
-            { "Szybkosc: ", "wolno", "srednio", "szybko" }, 
-            { "AI: ", "amator", "normalny", "geniusz" }, 
-            { "Add Speed: ", "0", "1", "2" }
+            { "Trudnosc: ", "lekko", "trudniej", "master" }, 
+            { "AI: ", "amator", "normalny", "geniusz" }
         };
         const int menuOptionValue[CYM_MENU_ROW_MAX][3] =  {
             { 1, 2, 0 }, 
             { 0, 1, 2 }, 
-            { 1, 2, 3 }, 
-            { 0, 1, 2 }
+            { 1, 2, 3 } 
         };
-        int rowOptionSelect[CYM_MENU_ROW_MAX] = { 1, 2,  2, 1 };
+        int rowOptionSelect[CYM_MENU_ROW_MAX] = { 1, 2,  2};
     };
  
 

@@ -80,7 +80,6 @@ void PadlePosAiUpdate(cymGameStruct& CymGame, cymBallStruct& Ball,  cymPlayerStr
   }
 }
 
-
 void PadlePosPlayerUpdate(cymGameStruct& CymGame, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer) {
   int PadleMinY = 0;
   int PadleMaxY = FieldYmax + 4;
@@ -116,14 +115,14 @@ void UpdateBallPosAndCheckBandOrGoal(cymGameStruct& CymGame, cymBallStruct& Ball
   UpdateBallXpos(Ball);
   UpdateBallYpos(Ball, LeftPlayer, RightPlayer);
   CheckIfBallHitBand(Ball);
-  if (Ball.x <= 3) {
+  if (Ball.x < 3) {
     CheckIfLeftPlayerLostGoal(CymGame, Ball, LeftPlayer, RightPlayer);
     if ( Ball.isHeading == toLeft ) Ball.isHeading = (direction)random(1,3);
     if ( Ball.isHeading == toLeftUp ) Ball.isHeading = toRightUp;
     if ( Ball.isHeading == toLeftDown ) Ball.isHeading = toRightDown;
     Ball.x = 5; 
   }
-  if (Ball.x >= FieldXmax-4) {
+  if (Ball.x >= FieldXmax-3) {
     CheckIfRightPlayerLostGoal(CymGame, Ball, LeftPlayer, RightPlayer);
     if ( Ball.isHeading == toRight ) Ball.isHeading = (direction)random(4,6);
     if ( Ball.isHeading == toRightUp ) Ball.isHeading = toLeftUp;
@@ -139,10 +138,10 @@ int UpdateBallDyAfterPadleHit(int BallX, int BallY, int LeftPadleY, int RightPad
   } else {
     padleHitDist = abs(BallY - RightPadleY);
   }
-  if (padleHitDist < 2) {return 1;
-  } else if (padleHitDist < 6) {return 2;
-  } else if  (padleHitDist < 9) {return 3;
-  } else return 5;
+  if (padleHitDist < 3) {return 1;
+  } else if (padleHitDist < 7) {return 2;
+  } else if  (padleHitDist < 10) {return 3;
+  } else return 4;
 }
 
 void CheckIfLeftPlayerLostGoal(cymGameStruct& CymGame, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer) {
@@ -176,9 +175,9 @@ void HandleLostGoal(cymGameStruct& CymGame, cymBallStruct& Ball, cymPlayerStruct
   DrawBall(Ball);
   Ball.prevX = Ball.x;
   if (Ball.x < HalfFieldX) {
-    Ball.x = 4;
+    Ball.x = 5;
   } else {
-    Ball.x = FieldXmax - 4;
+    Ball.x = FieldXmax - 5;
   }
   DisplayGoal(CymGame, Ball, LeftPlayer, RightPlayer);
 
@@ -241,7 +240,7 @@ void DrawPadle(cymGameStruct& CymGame, cymPlayerStruct& LeftPlayer, cymPlayerStr
 void ShowUserMenu(cymMenuStruct& Menu, cymGameStruct& CymGame) {
   btPressedCode btn;
   int SelectedRow = 0;
-  int SelectedRowOption = Menu.rowOptionSelect[SelectedRow];
+  int SelectedRowOption = Menu.--++++++++++++++++++++++++++++++++++++++++[SelectedRow];
   while (true) {
     myOLED.fillRect(0, Menu.initY, FieldXmax, FieldYmax-Menu.initY, SH110X_BLACK);
     DisplayMenuStrings(Menu, SelectedRow);
@@ -341,7 +340,7 @@ void UpdateBallYpos(cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerS
     case toLeft:
     case toRight:
       Ball.y = Ball.y;
-       break;
+      break;
   }
 }
 
