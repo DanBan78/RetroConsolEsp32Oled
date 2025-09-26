@@ -5,12 +5,15 @@
 
 // Tablica wskaźników do struktur z informacjami o grach
 const GameInfo* allGames[] = {
+    &GameInfo_Snoopy,
+    &GameInfo_Dino,
+    &GameInfo_HackMe,
     &GameInfo_Cymbergaj,
     &GameInfo_Slalom,
-    &GameInfo_Dino,
     &GameInfo_Wilk,
-    &GameInfo_SpaceShooter,
-    &GameInfo_HackMe,
+    
+    //&GameInfo_SpaceShooter,
+    &HelpInfo,
 
     // Dodaj kolejne gry: &GameInfo_SpaceShooter, &GameInfo_Slalom, ...
   };
@@ -41,8 +44,7 @@ void setup() {
   delay(500);
   CheckIfResetHighscores();
   delay(100);
-  DisplayHighscores();
-  //SerialPrintFreeRam();
+  //DisplayHighscores();
 }
 //####################################################################################
 void loop() {

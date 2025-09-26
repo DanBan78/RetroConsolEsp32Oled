@@ -3,21 +3,19 @@
 #include "gameSlalom/Slalom.cpp"
 #include "gameDino/Dino.cpp"
 #include "gameWilk/Wilk.cpp"
-#include "gameSpaceShooter/SpaceShooter.cpp"
+//#include "gameSpaceShooter/SpaceShooter.cpp"
 #include "gameHackMe/HackMe.cpp"
+#include "gameSnoopy/Snoopy.cpp"
+
 
 Adafruit_SH1106G myOLED = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-
 bool soundEnabled = false;
-
 bool Debug = true;
 bool sounddone = false;
 bool pauseGame = false;
-
 int GameSpeed = 0;
 int GameSelected = 1;
-
 int score = 0;
 int SessionScore = 0;
 
@@ -26,15 +24,19 @@ timerStruct Timer1Sec = {false, DELAY1000MS, 0, 0};
 void displayVar(int i) {
 	//myOLED.clearDisplay();
   myOLED.setTextColor(SH110X_WHITE);
-  myOLED.fillRect(10, 35, 26, 26, SH110X_BLACK);
-  myOLED.setTextSize(2);
-  myOLED.setCursor(10,35);
+  myOLED.fillRect(100, 10, 26, 26, SH110X_BLACK);
+  myOLED.setTextSize(1);
+  myOLED.setCursor(100,11);
   myOLED.print(i);
   //myOLED.display();
 }
 
 btPressedCode ReadButton(void (*callback)(timerStruct&), timerStruct& t) {
   btPressedCode ButtonCode = NONE;
+  if (digitalRead(BTN_1) == LOW && digitalRead(BTN_0) == LOW && digitalRead(BTN_3) == LOW && digitalRead(BTN_4) == LOW) {
+    ESP.restart();
+    return ButtonCode;
+  }
   if  (digitalRead(BTN_1) == LOW) ButtonCode = DownLeft;
   if  (digitalRead(BTN_0) == LOW) ButtonCode = UpLeft;
   if  (digitalRead(BTN_3) == LOW) ButtonCode = DownRight;
@@ -47,20 +49,25 @@ btPressedCode ReadButton(void (*callback)(timerStruct&), timerStruct& t) {
 }
 
 bool IsPressed(btPressedCode button){
-   delay(10); // debounce
-   switch(button) {
-     case DownLeft:
-       if (digitalRead(BTN_1) == LOW) return true;
-       break;
-     case UpLeft:
-       if (digitalRead(BTN_0) == LOW) return true;
-       break;
-     case DownRight:
-       if (digitalRead(BTN_3) == LOW) return true;
-       break;
-     case UpRight:
-       if (digitalRead(BTN_4) == LOW) return true;
-       break;
+  delay(10); // debounce
+  if (digitalRead(BTN_1) == LOW && 
+      digitalRead(BTN_0) == LOW && 
+      digitalRead(BTN_3) == LOW && 
+      digitalRead(BTN_4) == LOW) ESP.restart();
+
+  switch(button) {
+    case DownLeft:
+      if (digitalRead(BTN_1) == LOW) return true;
+      break;
+    case UpLeft:
+      if (digitalRead(BTN_0) == LOW) return true;
+      break;
+    case DownRight:
+      if (digitalRead(BTN_3) == LOW) return true;
+      break;
+    case UpRight:
+      if (digitalRead(BTN_4) == LOW) return true;
+      break;
    }
   return false;
 }
@@ -70,6 +77,10 @@ void WaitforButton() {
   while (btn == NONE) {
     btn = ReadButton(nullptr, Timer1Sec);
   } // wait for button press
+  btn = ReadButton(nullptr, Timer1Sec);
+  while (btn != NONE) {
+    btn = ReadButton(nullptr, Timer1Sec);
+  } 
   
 }
 
@@ -77,13 +88,14 @@ void WelcomeScreen() {
   myOLED.setTextColor(SH110X_WHITE);
   myOLED.clearDisplay();
   myOLED.display();
-  myOLED.setTextSize(2);
+  myOLED.setTextSize(1);
   myOLED.setCursor(10,20);
-  myOLED.print("ArduGame");
+  myOLED.print("RetroConsolEsp");
   myOLED.setTextSize(1);
   myOLED.setCursor(60,50);
   myOLED.print("dla Filipa");
   myOLED.display();
+  delay(500);
 }
 
 int GameSelectMenu() {
@@ -131,7 +143,7 @@ void displayMenu(int MenuStartRow, int totalGamesNo){
     myOLED.print(String(i+1)+". ");
     myOLED.print(allGames[i]->name);
   }
-  displaySound(soundEnabled);
+  displaySound(120, 0, soundEnabled);
   //displayVar(MenuStartRow);
   myOLED.display();
 }
@@ -149,14 +161,12 @@ void MyTune(int freq, int duration_ms) {
   delay(duration_ms);
   noTone(BUZZER_PIN);
 }
-void displaySound(bool sound){
+void displaySound(uint8_t x, uint8_t y, bool sound){
   myOLED.setTextSize(1);
-  //myOLED.setCursor(116,1);
   if (sound) {
-  myOLED.drawBitmap(120, 0, Glosnik, Glosnik_x_y, Glosnik_x_y, SH110X_WHITE);
-  //myOLED.print("!!");
+  myOLED.drawBitmap(x, y, Glosnik, Glosnik_x_y, Glosnik_x_y, SH110X_WHITE);
   } else {
-    myOLED.fillRect(120, 0, Glosnik_x_y, Glosnik_x_y, SH110X_BLACK);
+    myOLED.fillRect(x, y, Glosnik_x_y, Glosnik_x_y, SH110X_BLACK);
   }
 }
 void displaySound2(bool sound){
@@ -170,7 +180,7 @@ void displaySound2(bool sound){
   }
 }
 void CheckIfResetHighscores(){
-  if (IsPressed(UpLeft) && IsPressed(DownRight) && IsPressed(UpRight) && IsPressed(DownLeft)) {
+  if (IsPressed(UpLeft) && IsPressed(UpRight) && IsPressed(DownLeft)) {
     int reset = 0;
     EEPROM.put(WolfRecord, reset);
     EEPROM.put(SlalomRecord, reset);
@@ -201,6 +211,61 @@ void CheckIfResetHighscores(){
   myOLED.print(highscore);
   myOLED.display();
   delay(1000);
+ }
+
+const GameInfo HelpInfo = {
+  "Pomoc/info",
+  "opis obslugi konsoli",
+  DisplayHelpInfo
+};
+
+void DisplayHelpInfo() {
+  myOLED.clearDisplay();
+  myOLED.setTextSize(1);
+  for (int i=0; i<4; i++) {
+    char buffer[64];
+    const char* ptr = (const char*)pgm_read_ptr(&(teksty[i]));
+    strcpy_P(buffer, ptr);
+    myOLED.setCursor(0, 2+i*12);
+    myOLED.print(buffer);
+  }
+  myOLED.display();
+  delay(1000);
+  WaitforButton();
+  myOLED.clearDisplay();
+  for (int i=4; i<9; i++) {
+    char buffer[120];
+    const char* ptr = (const char*)pgm_read_ptr(&(teksty[i]));
+    strcpy_P(buffer, ptr);
+    myOLED.setCursor(0, 2+i*12-48);
+    myOLED.print(buffer);
+  }
+  myOLED.display();
+  WaitforButton();
+  delay(300);
+  myOLED.clearDisplay();
+   for (int i=4; i<9; i++) {
+    char buffer[120];
+    const char* ptr = (const char*)pgm_read_ptr(&(teksty[i]));
+    strcpy_P(buffer, ptr);
+    myOLED.setCursor(0, 2+i*12-48);
+    myOLED.print(buffer);
+  }
+  myOLED.display();
+  WaitforButton();
+  delay(500);
+  myOLED.clearDisplay();
+   for (int i=9; i<14; i++) {
+    char buffer[120];
+    const char* ptr = (const char*)pgm_read_ptr(&(teksty[i]));
+    strcpy_P(buffer, ptr);
+    myOLED.setCursor(0, 2+i*12-108);
+    myOLED.print(buffer);
+  }
+  myOLED.display();
+  WaitforButton();
+  delay(300);
+
  }
 
 void SerialPrintFreeRam() {

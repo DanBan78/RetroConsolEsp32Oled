@@ -6,11 +6,15 @@
     #define FieldXmax 126
     #define FieldYmax 62
     #define  deltaX 4
+    #define CYM_MENU_ROW_MAX 3
+    #define CYM_MENU_OPTION_IN_ROW_MAX 4
 
     extern const GameInfo* allGames[] ; 
     enum direction {toRight=0, toRightDown, toRightUp, toLeft, toLeftDown, toLeftUp};
     enum collision {noCollision=0, collisionLeft, collisionRight};
     enum speed {Wolno=0, Srednio, Szybko};
+    enum level {Lekko=0, Trudniej, Master};
+    enum aiLevel {Amator=1, Normalny, Geniusz};
 
     typedef struct cymBallStruct {
       int x;  // wspolrzedna x pilki
@@ -32,6 +36,7 @@
     typedef struct cymGameStruct {
       bool updateScreen;
       collision isCollision;
+      int playersNo;
       int aiLevel;
       unsigned long aiPadlePosPrevUpdateTime = 0;
       unsigned long aiPadlePosUpdateRate = 150;
@@ -40,8 +45,7 @@
       int maxPoints = 5;
       int padleDeltaMoveY;
       int padleHalfWidth;
-      int playersNo;
-      int speedInc;
+      level difficulty;
       speed ballSpeed;
     };
 
@@ -49,39 +53,37 @@
         const int initX = 7;
         const int initY = 18;
         const int deltaY = 11;
-        const int rowMax = 4;
-        const int optionsInRow =  sizeof(rowOptionSelect)/sizeof(rowOptionSelect[0]);
-        const String optionString[4][4] =  {
-            { "Tryb: ", "1 gracz", "2 graczy", "demo", }, 
-            { "Szybkosc: ", "wolno", "srednio", "szybko" }, 
-            { "AI: ", "amator", "normalny", "geniusz" }, 
-            { "Add Speed: ", "0", "1", "2" }
+        const int rowMax = CYM_MENU_ROW_MAX;
+        const int optionsInRow =  CYM_MENU_OPTION_IN_ROW_MAX;
+        const String optionString[CYM_MENU_ROW_MAX][CYM_MENU_OPTION_IN_ROW_MAX] =  {
+            { "Tryb:     ", "1 gracz", "2 graczy", "demo", }, 
+            { "Trudnosc: ", "lekko", "trudniej", "master" }, 
+            { "AI:       ", "amator", "normalny", "geniusz" }
         };
-        const int menuOptionValue[4][3] =  {
+        const int menuOptionValue[CYM_MENU_ROW_MAX][3] =  {
             { 1, 2, 0 }, 
             { 0, 1, 2 }, 
-            { 1, 2, 3 }, 
-            { 0, 1, 2 }
+            { 1, 2, 3 } 
         };
-        int rowOptionSelect[4] = { 1, 2,  2, 1 };
+        int rowOptionSelect[CYM_MENU_ROW_MAX] = { 1, 2,  2};
     };
  
 
 
-  bool itsGameOver(cymGameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
-  bool itsTimeForBallPosUpdate(cymBallStruct& Ball);
-  bool itsTimeForPadlePosUpdate(cymGameStruct& Game);
-  int updateBallDyAfterPadleHit(int BallX, int BallY, int LeftPadleY, int RightPadleY);
-  void updateBallPos(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
-  void updateBallXpos(cymBallStruct& Ball);
-  void updateBallYpos(cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  bool ItsGameOver(cymGameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  bool ItsTimeForBallPosUpdate(cymBallStruct& Ball);
+  bool ItsTimeForPadlePosUpdate(cymGameStruct& Game);
+  int UpdateBallDyAfterPadleHit(int BallX, int BallY, int LeftPadleY, int RightPadleY);
+  void UpdateBallPos(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void UpdateBallXpos(cymBallStruct& Ball);
+  void UpdateBallYpos(cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   void CheckIfBallHitBand(cymBallStruct& Ball);
   void CheckIfLeftPlayerLostGoal(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   void CheckIfRightPlayerLostGoal(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   void CymInitParams(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   void CymParamsUpdateFromUserMenu(cymMenuStruct& Menu, cymGameStruct& Game);
   void DisplayGameSummary(cymGameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
-  void DisplayGoal(cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void DisplayGoal(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   void DisplayScore(cymGameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   void DrawBall(cymBallStruct& Ball);
   void DrawField();
@@ -92,6 +94,6 @@
   void PadlePosAiUpdate(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   void PadlePosPlayerUpdate(cymGameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   void ShowUserMenu(cymMenuStruct& Menu, cymGameStruct& Game);
-  void UpdateBallPosAndCheckForColission(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
-
+  void UpdateBallPosAndCheckBandOrGoal(cymGameStruct& CymGame, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void DisplayMenuStrings(cymMenuStruct& Menu, int SelectedRow);
 #endif

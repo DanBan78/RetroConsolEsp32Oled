@@ -11,7 +11,7 @@ void Game_Wilk() {
   ShowScore();
   Location();
   GenerationEggs();
-  displaySound(soundEnabled);
+  displaySound(120, 0, soundEnabled);
 
   Serial.print("Wolf Init");
   SerialPrintFreeRam();
@@ -35,7 +35,7 @@ void Game_Wilk() {
       }
     }
     MoveEggs();
-    displaySound(soundEnabled);
+    displaySound(120, 0, soundEnabled);
     //myOLED.fillRect(0, 60, 128, 64,  SH110X_BLACK);
 
     if (eventEggs) {myOLED.display(); eventEggs = 0;}

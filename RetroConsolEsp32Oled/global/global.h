@@ -7,9 +7,11 @@
   #include <SPI.h>
   #include <EEPROM.h>
   #include <Wire.h>
+  #include <pgmspace.h>
+  #include <Fonts/TomThumb.h>
 
   #define HALT while(1)
-	#define OLED_RESET     4    // Reset pin # (or -1 if sharing Arduino reset pin)
+	#define OLED_RESET     -1    // Reset pin # (or -1 if sharing Arduino reset pin)
 	#define SCREEN_ADDRESS 0x3C
 	#define SCREEN_WIDTH   128  // OLED display width, in pixels
 	#define SCREEN_HEIGHT  64   // OLED display height, in pixels
@@ -40,8 +42,7 @@
   #define PongRecord 12
 
 //  bool ActiveButton = false;
-  enum btPressedCode { UpLeft, DownRight, NONE, UpRight, DownLeft };
-
+  enum btPressedCode { UpLeft, DownRight, NONE, UpRight, DownLeft, ALL_BTN };
 
   typedef void (*GameLaunchFunc)();
 
@@ -68,15 +69,33 @@
     0x19, 0x2a, 0xec, 0xab, 0xec, 0x2a, 0x19, 0x08
   };
   
-
 //####################################################
-  int GameSelectMenu();
+
+
+const char str0[] PROGMEM = "Przyciski ...";
+const char str1[] PROGMEM = "LeftUp/Down ";
+const char str2[] PROGMEM = "zmiana wiersza menu";
+const char str3[] PROGMEM = "gora/dol";
+const char str4[] PROGMEM = "Przycisk ..";
+const char str5[] PROGMEM = "RightUp";
+const char str6[] PROGMEM = "zmiana opcji menu";
+const char str7[] PROGMEM = "menu gl.wl/wyl dzwiek";
+const char str8[] PROGMEM = "wybrane gry PAUZA";
+const char str9[] PROGMEM = "Przycisk .";
+const char str10[] PROGMEM = "RightDown";
+const char str11[] PROGMEM = "enter / start gry";
+const char str12[] PROGMEM = "WSZYSTKIE NA RAZ ";
+const char str13[] PROGMEM = "powrot do m. glownego";
+
+
+const char* const teksty[] PROGMEM = { str0, str1, str2, str3, str4, str5, str6, str7, str8, str9, str10, str11, str12, str13 };
   btPressedCode ReadButton(void (*callback)(timerStruct&),timerStruct& t);
   bool IsPressed(btPressedCode button);
   bool CheckIfTimePassed(unsigned long& LastTimeCheckOneSec, unsigned long interval);
 
   void displayVar(int i);
-  void displaySound(bool sound);
+  void DisplayHelpInfo();
+  void displaySound(uint8_t x, uint8_t y, bool sound);
   void displaySound2(bool sound);
   void displayMenu(int MenuStartRow, int totalGamesNo);
   void WaitforButton();
@@ -104,10 +123,12 @@
   #define TON_MENU_FREQ  1320
   #define TON_MENU_CZAS  50
 
-#define DELAY10MS 10
-#define DELAY250MS 250
-#define DELAY500MS 500
-#define DELAY100MS 100
-#define DELAY50MS 50
-#define DELAY1000MS 1000
+  #define DELAY10MS 10
+  #define DELAY250MS 250
+  #define DELAY500MS 500
+  #define DELAY100MS 100
+  #define DELAY50MS 50
+  #define DELAY1000MS 1000
+  #define DELAY1500MS 1500
+  #define DELAY2000MS 2000
 #endif
