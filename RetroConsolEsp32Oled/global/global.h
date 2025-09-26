@@ -95,7 +95,7 @@ const char* const teksty[] PROGMEM = { str0, str1, str2, str3, str4, str5, str6,
 
   void displayVar(int i);
   void DisplayHelpInfo();
-  void displaySound(bool sound);
+  void displaySound(uint8_t x, uint8_t y, bool sound);
   void displaySound2(bool sound);
   void displayMenu(int MenuStartRow, int totalGamesNo);
   void WaitforButton();

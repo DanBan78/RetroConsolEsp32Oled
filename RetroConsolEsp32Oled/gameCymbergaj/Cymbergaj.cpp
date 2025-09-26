@@ -44,20 +44,21 @@ void CymInitParams(cymGameStruct& CymGame, cymBallStruct& Ball, cymPlayerStruct&
   RightPlayer.y = HalfFieldY;
   LeftPlayer.score = 0;
   RightPlayer.score = 0;
-
-  CymGame.padleHalfWidth = 11;
   CymGame.padleDeltaMoveY = 3;
   CymGame.updateScreen = true;
 
-  switch (CymGame.ballSpeed) {
-    case Wolno:
-      Ball.updateRateInit = 80;
+  switch (CymGame.difficulty) {
+    case Lekko:
+      Ball.updateRateInit = 30;
+      CymGame.padleDeltaMoveY = 3;
       break;
-    case Srednio:
-      Ball.updateRateInit = 25;
+    case Trudniej:
+      Ball.updateRateInit = 22;
+      CymGame.padleDeltaMoveY = 2;
       break;
-    case Szybko:
-      Ball.updateRateInit = 20;
+    case Master:
+      Ball.updateRateInit = 18;
+      CymGame.padleDeltaMoveY = 2;
       break;
   }
   Ball.updateRate = Ball.updateRateInit;
@@ -152,7 +153,7 @@ void CheckIfLeftPlayerLostGoal(cymGameStruct& CymGame, cymBallStruct& Ball, cymP
 
   } else {
     if (soundEnabled) MyTune(TON_RAMKA_FREQ,30);
-    Ball.updateRate = Ball.updateRate - CymGame.speedInc;
+    Ball.updateRate = Ball.updateRate;
     Ball.dY = UpdateBallDyAfterPadleHit(Ball.x, Ball.y, LeftPlayer.y, RightPlayer.y);
   }
 }
@@ -165,7 +166,7 @@ void CheckIfRightPlayerLostGoal(cymGameStruct& CymGame, cymBallStruct& Ball, cym
 
   } else {
     if (soundEnabled) MyTune(TON_ODLICZANIE_FREQ,30);
-    Ball.updateRate = Ball.updateRate - CymGame.speedInc;
+    Ball.updateRate = Ball.updateRate;
     Ball.dY = UpdateBallDyAfterPadleHit(Ball.x, Ball.y, LeftPlayer.y, RightPlayer.y);
   }
 }
@@ -240,7 +241,7 @@ void DrawPadle(cymGameStruct& CymGame, cymPlayerStruct& LeftPlayer, cymPlayerStr
 void ShowUserMenu(cymMenuStruct& Menu, cymGameStruct& CymGame) {
   btPressedCode btn;
   int SelectedRow = 0;
-  int SelectedRowOption = Menu.--++++++++++++++++++++++++++++++++++++++++[SelectedRow];
+  int SelectedRowOption = Menu.rowOptionSelect[SelectedRow];
   while (true) {
     myOLED.fillRect(0, Menu.initY, FieldXmax, FieldYmax-Menu.initY, SH110X_BLACK);
     DisplayMenuStrings(Menu, SelectedRow);
@@ -281,7 +282,7 @@ void DisplayMenuStrings(cymMenuStruct& Menu, int SelectedRow) {
   myOLED.print("Cymbergaj");
   myOLED.setTextSize(1);
   myOLED.setCursor(1, Menu.initY+ Menu.deltaY);
-  myOLED.print(">");
+  myOLED.print("> ");
 
   for (int i=0; i< Menu.rowMax; i++) {
     if (Menu.rowMax > SelectedRow+i) {
@@ -294,9 +295,19 @@ void DisplayMenuStrings(cymMenuStruct& Menu, int SelectedRow) {
 
 void CymParamsUpdateFromUserMenu(cymMenuStruct& Menu, cymGameStruct& CymGame) {
   CymGame.playersNo = Menu.menuOptionValue[0][Menu.rowOptionSelect[0]-1];
-  CymGame.ballSpeed = (speed)Menu.menuOptionValue[1][Menu.rowOptionSelect[1]-1];
+  CymGame.difficulty = (level)Menu.menuOptionValue[1][Menu.rowOptionSelect[1]-1];
   CymGame.aiLevel = Menu.menuOptionValue[2][Menu.rowOptionSelect[2]-1];
-  CymGame.speedInc = Menu.menuOptionValue[3][Menu.rowOptionSelect[3]-1];
+  switch(CymGame.difficulty) {
+    case Lekko:
+      CymGame.padleHalfWidth = 14;
+      break;
+    case Trudniej:
+      CymGame.padleHalfWidth = 11;
+      break;
+    case Master:
+      CymGame.padleHalfWidth = 8;
+      break;
+  }
 }
 
 bool ItsTimeForBallPosUpdate(cymBallStruct& Ball) {

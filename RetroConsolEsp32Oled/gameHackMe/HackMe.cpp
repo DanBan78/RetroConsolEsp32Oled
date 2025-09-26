@@ -21,7 +21,7 @@ void Game_HackMe() {
       initGameParameters(HackMeGame, Timer1Sec);
     } else GameRestart(HackMeGame);
     while(true) {
-      displaySound();
+      hdisplaySound();
       if (FirstDigitIsWrong(HackMeGame,Timer1Sec)) break;
       if (SecondDigitIsWrong(HackMeGame,Timer1Sec)) break;
       if (ThirdDigitIsWrong(HackMeGame,Timer1Sec)) break;
@@ -483,7 +483,7 @@ void GenerateRandomCodeMatrix(HackMeStruct& HackMeGame) {
   }
 }
 
-void displaySound() {
+void hdisplaySound() {
   if (!soundEnabled) {
     myOLED.setTextColor(SH110X_BLACK);
     myOLED.setCursor(88, 52);

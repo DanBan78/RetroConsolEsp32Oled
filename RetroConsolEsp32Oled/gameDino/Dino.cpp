@@ -103,7 +103,7 @@ void FirstGameFrame(dGameStr& DinoGame, jumpStr& Dino, obstStr& obst1, obstStr& 
 void UpdateGameFrame( dGameStr& DinoGame, jumpStr& Dino, aeroStr& Aero, obstStr& obst1, obstStr& obst2, const GameConstStr& GameConst) {
   myOLED.clearDisplay();
   DisplayScore(DinoGame, Dino);
-  displaySound(soundEnabled);
+  displaySound(120, 0, soundEnabled);
   if (Dino.food == 0) DisplayOutOfFoodInfo();
 
   MoveTree(DinoGame,obst1, GameConst);
@@ -310,7 +310,7 @@ void JumpHigh(dGameStr& DinoGame, jumpStr& Dino, const GameConstStr& GameConst) 
 	if(Dino.jump == 1){
     Dino.jumpStartX = 0;
 		if (soundEnabled && !sounddone) void JumpSound();
-    Dino.y-=6;
+    Dino.y-=3;
     TurboSpeed(DinoGame,false, &Dino.y);
 
     if(Dino.y < (GameConst.jumper_baseY-GameConst.jumper_jumpHeight)){
@@ -320,9 +320,9 @@ void JumpHigh(dGameStr& DinoGame, jumpStr& Dino, const GameConstStr& GameConst) 
     }
   } else if (Dino.jump==2){
     Dino.jumpStartX += 1;
-    if (Dino.jumpStartX > 7)  Dino.jump = 3;
+    if (Dino.jumpStartX > 6)  Dino.jump = 3;
   } else if (Dino.jump==3){
-    Dino.y+=9;
+    Dino.y+=7;
       TurboSpeed(DinoGame,true, &Dino.y);
     if (Dino.y >= GameConst.jumper_baseY){
       Dino.y = GameConst.jumper_baseY;

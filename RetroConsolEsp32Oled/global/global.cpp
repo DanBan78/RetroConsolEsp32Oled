@@ -5,6 +5,7 @@
 #include "gameWilk/Wilk.cpp"
 //#include "gameSpaceShooter/SpaceShooter.cpp"
 #include "gameHackMe/HackMe.cpp"
+#include "gameSnoopy/Snoopy.cpp"
 
 
 Adafruit_SH1106G myOLED = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
@@ -76,6 +77,10 @@ void WaitforButton() {
   while (btn == NONE) {
     btn = ReadButton(nullptr, Timer1Sec);
   } // wait for button press
+  btn = ReadButton(nullptr, Timer1Sec);
+  while (btn != NONE) {
+    btn = ReadButton(nullptr, Timer1Sec);
+  } 
   
 }
 
@@ -138,7 +143,7 @@ void displayMenu(int MenuStartRow, int totalGamesNo){
     myOLED.print(String(i+1)+". ");
     myOLED.print(allGames[i]->name);
   }
-  displaySound(soundEnabled);
+  displaySound(120, 0, soundEnabled);
   //displayVar(MenuStartRow);
   myOLED.display();
 }
@@ -156,14 +161,12 @@ void MyTune(int freq, int duration_ms) {
   delay(duration_ms);
   noTone(BUZZER_PIN);
 }
-void displaySound(bool sound){
+void displaySound(uint8_t x, uint8_t y, bool sound){
   myOLED.setTextSize(1);
-  //myOLED.setCursor(116,1);
   if (sound) {
-  myOLED.drawBitmap(120, 0, Glosnik, Glosnik_x_y, Glosnik_x_y, SH110X_WHITE);
-  //myOLED.print("!!");
+  myOLED.drawBitmap(x, y, Glosnik, Glosnik_x_y, Glosnik_x_y, SH110X_WHITE);
   } else {
-    myOLED.fillRect(120, 0, Glosnik_x_y, Glosnik_x_y, SH110X_BLACK);
+    myOLED.fillRect(x, y, Glosnik_x_y, Glosnik_x_y, SH110X_BLACK);
   }
 }
 void displaySound2(bool sound){
