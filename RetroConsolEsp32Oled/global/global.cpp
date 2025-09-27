@@ -2,8 +2,6 @@
 #include "gameCymbergaj/Cymbergaj.cpp"
 #include "gameSlalom/Slalom.cpp"
 #include "gameDino/Dino.cpp"
-#include "gameWilk/Wilk.cpp"
-//#include "gameSpaceShooter/SpaceShooter.cpp"
 #include "gameHackMe/HackMe.cpp"
 #include "gameSnoopy/Snoopy.cpp"
 
@@ -136,15 +134,14 @@ void displayMenu(int MenuStartRow, int totalGamesNo){
   if (MenuStartRow < 0) MenuStartRow = 0;
   if (MenuStartRow > totalGamesNo) MenuStartRow = totalGamesNo;
   myOLED.setCursor(1,0);
-  myOLED.print(">>");
+  myOLED.print(">");
 
   for (int i=MenuStartRow; i<MenuStartRow+maxMenuRowsOnScreen && i< totalGamesNo; i++){
-    myOLED.setCursor(20,(i-MenuStartRow)*12);
+    myOLED.setCursor(10,(i-MenuStartRow)*12);
     myOLED.print(String(i+1)+". ");
     myOLED.print(allGames[i]->name);
   }
-  displaySound(120, 0, soundEnabled);
-  //displayVar(MenuStartRow);
+  displaySoundInfo(120, 0, soundEnabled);
   myOLED.display();
 }
 
@@ -161,7 +158,7 @@ void MyTune(int freq, int duration_ms) {
   delay(duration_ms);
   noTone(BUZZER_PIN);
 }
-void displaySound(uint8_t x, uint8_t y, bool sound){
+void displaySoundInfo(uint8_t x, uint8_t y, bool sound){
   myOLED.setTextSize(1);
   if (sound) {
   myOLED.drawBitmap(x, y, Glosnik, Glosnik_x_y, Glosnik_x_y, SH110X_WHITE);
@@ -169,7 +166,7 @@ void displaySound(uint8_t x, uint8_t y, bool sound){
     myOLED.fillRect(x, y, Glosnik_x_y, Glosnik_x_y, SH110X_BLACK);
   }
 }
-void displaySound2(bool sound){
+void displaySoundInfo2(bool sound){
   myOLED.setTextSize(1);
   //myOLED.setCursor(116,1);
   if (sound) {
@@ -182,14 +179,17 @@ void displaySound2(bool sound){
 void CheckIfResetHighscores(){
   if (IsPressed(UpLeft) && IsPressed(UpRight) && IsPressed(DownLeft)) {
     int reset = 0;
-    EEPROM.put(WolfRecord, reset);
-    EEPROM.put(SlalomRecord, reset);
-    EEPROM.put(DinoRecord, reset);
+    EEPROM.put(Game_WolfRecord, reset);
+    EEPROM.put(Game_SlalomRecord, reset);
+    EEPROM.put(Game_DinoRecord, reset);
+    EEPROM.put(Game_SnoopyRecord, reset);
+    EEPROM.put(Game_CymbergajRecord, reset);
+    EEPROM.put(Game_SpaceShooterRecord, reset);
     EEPROM.commit();
   }
  }
 
- void DisplayHighscores(){
+void DisplayHighscores(){
   myOLED.clearDisplay();
   myOLED.setTextSize(1);
 
@@ -199,15 +199,15 @@ void CheckIfResetHighscores(){
   myOLED.setCursor(5,15);
   myOLED.print("DinoRecord: ");
   int highscore;
-  EEPROM.get(DinoRecord, highscore);
+  EEPROM.get(Game_DinoRecord, highscore);
   myOLED.print(highscore);
   myOLED.setCursor(5,27);
-  myOLED.print("WolfRecord: ");
-  EEPROM.get(WolfRecord, highscore);
+  myOLED.print("Snoopy: ");
+  EEPROM.get(Game_SnoopyRecord, highscore);
   myOLED.print(highscore);
   myOLED.setCursor(5,39);
-  myOLED.print("SlalomRecord: ");
-  EEPROM.get(SlalomRecord, highscore);
+  myOLED.print("Slalom: ");
+  EEPROM.get(Game_SlalomRecord, highscore);
   myOLED.print(highscore);
   myOLED.display();
   delay(1000);
@@ -216,7 +216,8 @@ void CheckIfResetHighscores(){
 const GameInfo HelpInfo = {
   "Pomoc/info",
   "opis obslugi konsoli",
-  DisplayHelpInfo
+  DisplayHelpInfo,
+  -1  // Pomoc nie zapisuje highscore
 };
 
 void DisplayHelpInfo() {
@@ -226,46 +227,49 @@ void DisplayHelpInfo() {
     char buffer[64];
     const char* ptr = (const char*)pgm_read_ptr(&(teksty[i]));
     strcpy_P(buffer, ptr);
-    myOLED.setCursor(0, 2+i*12);
+    if (i==0) {
+      myOLED.setCursor(0, 1);
+    } else myOLED.setCursor(0, 14+i*12);
     myOLED.print(buffer);
   }
   myOLED.display();
-  delay(1000);
   WaitforButton();
   myOLED.clearDisplay();
   for (int i=4; i<9; i++) {
     char buffer[120];
     const char* ptr = (const char*)pgm_read_ptr(&(teksty[i]));
     strcpy_P(buffer, ptr);
-    myOLED.setCursor(0, 2+i*12-48);
+    if (i==4) {
+      myOLED.setCursor(0, 1);
+    } else myOLED.setCursor(0, 14+(i-4)*12);
     myOLED.print(buffer);
   }
   myOLED.display();
   WaitforButton();
-  delay(300);
   myOLED.clearDisplay();
-   for (int i=4; i<9; i++) {
+  for (int i=9; i<12; i++) {
     char buffer[120];
     const char* ptr = (const char*)pgm_read_ptr(&(teksty[i]));
     strcpy_P(buffer, ptr);
-    myOLED.setCursor(0, 2+i*12-48);
+    if (i==9) {
+      myOLED.setCursor(0, 1);
+    } else myOLED.setCursor(0, 14+(i-9)*12);
     myOLED.print(buffer);
   }
   myOLED.display();
   WaitforButton();
-  delay(500);
   myOLED.clearDisplay();
-   for (int i=9; i<14; i++) {
+  for (int i=12; i<14; i++) {
     char buffer[120];
     const char* ptr = (const char*)pgm_read_ptr(&(teksty[i]));
     strcpy_P(buffer, ptr);
-    myOLED.setCursor(0, 2+i*12-108);
+    if (i==12) {
+      myOLED.setCursor(0, 1);
+    } else myOLED.setCursor(0, 14+(i-12)*12);
     myOLED.print(buffer);
   }
   myOLED.display();
   WaitforButton();
-  delay(300);
-
  }
 
 void SerialPrintFreeRam() {

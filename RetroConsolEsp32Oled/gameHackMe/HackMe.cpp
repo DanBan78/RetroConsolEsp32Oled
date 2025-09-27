@@ -21,7 +21,7 @@ void Game_HackMe() {
       initGameParameters(HackMeGame, Timer1Sec);
     } else GameRestart(HackMeGame);
     while(true) {
-      hdisplaySound();
+      hdisplaySoundInfo();
       if (FirstDigitIsWrong(HackMeGame,Timer1Sec)) break;
       if (SecondDigitIsWrong(HackMeGame,Timer1Sec)) break;
       if (ThirdDigitIsWrong(HackMeGame,Timer1Sec)) break;
@@ -458,13 +458,22 @@ void errorSound() {
 void WelcomeHackMeScreen() {
   myOLED.clearDisplay();
   myOLED.setTextColor(SH110X_WHITE);
+  myOLED.setTextSize(2);
+  myOLED.setCursor(2, 1);
+  myOLED.println("Disarm it!");
   myOLED.setTextSize(1);
+  myOLED.setCursor(0, 20);
+  myOLED.println("o > select row/col");
+  myOLED.setCursor(0, 31);
 
-  myOLED.setCursor(0, 10);
-  myOLED.println(F("Hack Me If You Can!"));
-  myOLED.setCursor(20, 30);
-  myOLED.println(F("Press any key.."));
+  myOLED.println("o > select row/col");
+  myOLED.setCursor(45, 44);
+  myOLED.println("      --- > o");
+  myOLED.setCursor(45, 55);
+
+  myOLED.println("    Enter > o");
   myOLED.display();
+  delay(DELAY2000MS);
 } 
 
 void GenerateRandomCodeMatrix(HackMeStruct& HackMeGame) {
@@ -475,7 +484,8 @@ void GenerateRandomCodeMatrix(HackMeStruct& HackMeGame) {
     displayMatrix(HackMeGame);
     myOLED.display();
   }
-  while (ReadButton(nullptr, Timer1Sec) != DownRight) {
+  while (ReadButton(nullptr, Timer1Sec) != NONE);
+  while (ReadButton(nullptr, Timer1Sec) == NONE) {
     myOLED.clearDisplay();
     randomMatrix(HackMeGame);
     displayMatrix(HackMeGame);
@@ -483,7 +493,7 @@ void GenerateRandomCodeMatrix(HackMeStruct& HackMeGame) {
   }
 }
 
-void hdisplaySound() {
+void hdisplaySoundInfo() {
   if (!soundEnabled) {
     myOLED.setTextColor(SH110X_BLACK);
     myOLED.setCursor(88, 52);
@@ -539,7 +549,8 @@ void selectFirstRowCol(HackMeStruct& HackMeGame) {
 }
 
 const GameInfo GameInfo_HackMe = {
-  "HackMe",
+  "Disarm the bomb",
   "Rozbroj bombe wbijajac kod",
-  Game_HackMe
+  Game_HackMe,
+  -1  // HackMe nie zapisuje highscore
 };

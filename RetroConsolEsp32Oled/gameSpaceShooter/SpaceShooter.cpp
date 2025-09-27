@@ -145,5 +145,6 @@ void Game_SpaceShooter() {
 const GameInfo GameInfo_SpaceShooter = {
   "Space Shooter",
   "Strzelaj do wrogów, omijaj przeszkody!",
-  Game_SpaceShooter
+  Game_SpaceShooter,
+  Game_SpaceShooterRecord
 };

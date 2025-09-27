@@ -84,6 +84,7 @@
       myOLED.print(k);
     } else  {myOLED.drawBitmap(120, 1, live_no, 5, 6, SH110X_WHITE);}
   }
+
   void GameSlalomInit() {
     LivesLeft = LivesInit;
     FuelLevel = FuelInit;
@@ -99,7 +100,7 @@
         Sprites_Array[i][j] = CLEAN;
       }
     }
-    displaySound2(soundEnabled);
+    displaySoundInfo2(soundEnabled);
     DisplayRoad();
     DisplayInitTrack();
     LivesLeftDisplay(LivesLeft);
@@ -153,6 +154,7 @@
         break;
     }
   }
+
   void DisplayCar(int car_x) {
 
     if (car_x<1 || car_x>4) return;
@@ -172,6 +174,7 @@
         break;
     }
   }
+
   void DisplayRoad() {
     myOLED.drawLine(sprite_x[4][0]-3, SCREEN_HEIGHT, sprite_x[0][0]+4, 0, SH110X_WHITE);
     myOLED.drawLine(sprite_x[4][0]-4, SCREEN_HEIGHT, sprite_x[0][0]+3, 0, SH110X_WHITE);
@@ -183,6 +186,7 @@
     *x = sprite_x[row][column];
     *y = sprite_y[row];
   }
+
   void displayPoints() {
     myOLED.setTextSize(1);
     myOLED.setCursor(0,0);
@@ -194,18 +198,20 @@
     // myOLED.print("sped");myOLED.print(FrameDelay);
     
   }
+
   void RedrawScreen() {
     myOLED.clearDisplay();
     display_roadLine();
   
     UpdateRaceArray();
-    displaySound2(soundEnabled);
+    displaySoundInfo2(soundEnabled);
     DisplayRoad();
     DisplayInitTrack();
     LivesLeftDisplay(LivesLeft);
     displayPoints();
     myOLED.display();
   }
+
   void UpdateRaceArray() {
     SpriteCode tempArray[4] ={CLEAN,CLEAN,CLEAN,CLEAN};
 
@@ -228,6 +234,7 @@
       Sprites_Array[0][column] = tempArray[column]; //
     }
   }
+
   void NewRowFromCode(int Code) {
     for (int i = 0; i < 4; i++) {
       NewRow_Array[i] = CLEAN;
@@ -235,6 +242,7 @@
     }
     return;
   }
+
   void GenerateNextRow(SpriteCode Array[4]) {
     int KodWiersza;
     int LosLevelRow;
@@ -262,12 +270,14 @@
       Array[j] = NewRow_Array[j];
     }
   }
+
   void EraseCarFromDisplay() {
     myOLED.drawBitmap(sprite_x[4][0], sprite_y[4], motor_2, f1_width, f1_height, SH110X_BLACK);
     myOLED.drawBitmap(sprite_x[4][1], sprite_y[4], motor_2, f1_width, f1_height, SH110X_BLACK);
     myOLED.drawBitmap(sprite_x[4][2], sprite_y[4], motor_2, f1_width, f1_height, SH110X_BLACK);
     myOLED.drawBitmap(sprite_x[4][3], sprite_y[4], motor_2, f1_width, f1_height, SH110X_BLACK);
   }
+
   bool CheckIfNextFrame() {
     if (millis()-LastTime > (FrameDelay)) {
         LastTime  = millis();
@@ -275,6 +285,7 @@
     }
     return false;
   }
+
   bool CheckIfRoadLanesSwitch() {
     if (millis()-LastTime2 > (FrameDelay)) {
       LastTime2  = millis();
@@ -282,6 +293,7 @@
     }
     return false;
   }
+
   void CheckIfColissionHappen() {
     switch(Sprites_Array[4][car_x-1]) {
       case(CLEAN):
@@ -307,6 +319,7 @@
         break;
     }
   }
+
   void DisplayTankowanie() {
     DisplayCar(car_x);
     myOLED.drawBitmap(113, 30, f1_tanking, 18, 18, SH110X_WHITE);
@@ -332,6 +345,7 @@
     FrameDelay = DelayFramesInit;
     myOLED.display();
   }
+
 	void Poslizg() {
     delay(20);
     EraseCarFromDisplay();
@@ -371,8 +385,8 @@
         car_x = car_x + random(-1,1);
         break;  
     }
-    
   }
+
   void ResetRaceArray() {
     for (int column = 0; column < 4; column++) {
       Sprites_Array[0][column] = Sprites_Array[2][column];
@@ -390,11 +404,11 @@
       Sprites_Array[4][column] = CLEAN;
     }
   }
-	void ColissionDetected() {
 
+	void ColissionDetected() {
     colissionsCount++;
     ResetRaceArray();
-    displaySound2(soundEnabled);
+    displaySoundInfo2(soundEnabled);
     DisplayRoad();
     DisplayInitTrack();
     LivesLeftDisplay(LivesLeft);
@@ -404,6 +418,7 @@
     myOLED.display();
     delay(400);
   }
+
   void GameOverSlalomDisplay() {
     myOLED.setTextSize(1); 
     myOLED.clearDisplay();
@@ -411,9 +426,9 @@
       SlalomSesionScore = score;
     }
     int Slalom_highscore;
-    EEPROM.get(SlalomRecord, Slalom_highscore);
+    EEPROM.get(Game_SlalomRecord, Slalom_highscore);
     if (score > Slalom_highscore) {
-      EEPROM.put(SlalomRecord, score);
+      EEPROM.put(Game_SlalomRecord, score);
       EEPROM.commit();
     }
     if (FuelLevel == 0) {
@@ -430,16 +445,17 @@
     myOLED.print(SlalomSesionScore);
     myOLED.setCursor(1,36);
     myOLED.print("All time best: ");
-    EEPROM.get(SlalomRecord, Slalom_highscore);
+    EEPROM.get(Game_SlalomRecord, Slalom_highscore);
     myOLED.print(Slalom_highscore);
     myOLED.display();
-
   }
+
   void CleanRow5() {
     for (int column = 0; column < 4; column++) {
       Sprites_Array[4][column] = CLEAN;
     }
   }
+
   void CalculateGameSpeedAndLevel() {
     if (score >= 20) FrameDelay = 400;
     if (score >= 30) FrameDelay = 380;
@@ -453,13 +469,8 @@
     if (score >= 130) FrameDelay = 230;
     if (score >= 140) FrameDelay = 210;
     if (score >= 150) FrameDelay = 200;
-
-    // if (score == 10) GameLevel = 2;
-    // if (score == 15) FrameDelay = 400;
-    // if (score == 20) FrameDelay = 380;
-    // if (score == 25) FrameDelay = 350;
-    // if (score == 30) FrameDelay = 300;
   }
+
   void checkIfGameOver() {
     if (LivesLeft == 0 || FuelLevel == 0) GameOverSlalom=true;
     if (score - OldScoreForLivesAdding > 40) {
@@ -471,6 +482,7 @@
       OldScoreForLivesAdding = score;
     }
   }
+
   void AddFuelStation() {
     if (Sprites_Array[0][3] == CLEAN && 
         Sprites_Array[1][3] == CLEAN && 
@@ -485,6 +497,7 @@
       Sprites_Array[3][3] = CLEAN;
     } 
   }
+
   void AddPlamaOleju() {
     if (random(1,100)<15) {
       if (Sprites_Array[0][0] == GATE && Sprites_Array[0][1]) {
@@ -510,10 +523,31 @@
 
 // //############################################
 
+void WelcomeSlalomScreen() {
+  myOLED.clearDisplay();
+  myOLED.setTextColor(SH110X_WHITE);
+  myOLED.setTextSize(2);
+  myOLED.setCursor(2, 1);
+  myOLED.println("Just ride");
+  myOLED.setTextSize(1);
+  myOLED.setCursor(45, 31);
+  myOLED.println("    pause > o");
+
+  myOLED.setCursor(0, 42);
+  myOLED.println("o > left");
+
+  myOLED.setCursor(45, 42);
+  myOLED.println("    right > o");
+  myOLED.display();
+  delay(DELAY2000MS);
+} 
+
 void Game_Slalom() {
   while(1==1) {  
     bool btnActive = false;
     btPressedCode btn;
+
+    WelcomeSlalomScreen();
     myOLED.clearDisplay();
     GameSlalomInit();
     myOLED.display();
@@ -559,5 +593,6 @@ void Game_Slalom() {
 const GameInfo GameInfo_Slalom = {
 	"Slalom",
 	"Zjeżdżaj, omijaj bramki i przeszkody!",
-	Game_Slalom
+	Game_Slalom,
+	Game_SlalomRecord
 };

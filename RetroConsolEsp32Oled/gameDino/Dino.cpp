@@ -38,7 +38,7 @@
       DisplayWelcomeScreen();
       while (1) {
         InitValuesAfterReplay(DinoGame, Dino, Aero, obst1, obst2, GameConst);
-        WaitforButton();
+        delay(DELAY2000MS);
         FirstGameFrame(DinoGame, Dino, obst1, obst2, GameConst);
 
         PlayGame(DinoGame, Dino, Aero, obst1, obst2, GameConst);
@@ -79,11 +79,19 @@ void DisplayWelcomeScreen(){
 
   myOLED.setTextColor(SH110X_WHITE);
   myOLED.setTextSize(2);
-  myOLED.setCursor(10,5);
+  myOLED.setCursor(10,1);
   myOLED.println("Dino Run");
   myOLED.setTextSize(1);
-  myOLED.setCursor(5,45);
-  myOLED.println("Push button to Play");
+  myOLED.setCursor(0, 20);
+  myOLED.println("o > change skin");
+  myOLED.setCursor(0, 31);
+
+  myOLED.println("o > high jump");
+  myOLED.setCursor(45, 44);
+  myOLED.println("    pause > o");
+  myOLED.setCursor(45, 55);
+
+  myOLED.println("long jump > o");
   myOLED.display();
 }
 
@@ -103,8 +111,8 @@ void FirstGameFrame(dGameStr& DinoGame, jumpStr& Dino, obstStr& obst1, obstStr& 
 void UpdateGameFrame( dGameStr& DinoGame, jumpStr& Dino, aeroStr& Aero, obstStr& obst1, obstStr& obst2, const GameConstStr& GameConst) {
   myOLED.clearDisplay();
   DisplayScore(DinoGame, Dino);
-  displaySound(120, 0, soundEnabled);
-  if (Dino.food == 0) DisplayOutOfFoodInfo();
+  displaySoundInfo(120, 0, soundEnabled);
+  if (Dino.food <= 0) DisplayOutOfFoodInfo();
 
   MoveTree(DinoGame,obst1, GameConst);
   MoveTree(DinoGame,obst2, GameConst);
@@ -123,9 +131,9 @@ void DisplayOutOfFoodInfo(){
 void PlayGame(dGameStr& DinoGame, jumpStr& Dino, aeroStr& Aero, obstStr& obst1, obstStr& obst2, const GameConstStr& GameConst) {
   while (true) {
     myOLED.clearDisplay();
-    ButtonsActions(DinoGame, Dino);
+    CheckButtons(DinoGame, Dino);
 
-    if ((Dino.food == 0)){
+    if ((Dino.food <= 0)){
       if (Dino.jump == 1) Dino.jump = 0;
     }
     if (Dino.jump != 0) {
@@ -316,6 +324,7 @@ void JumpHigh(dGameStr& DinoGame, jumpStr& Dino, const GameConstStr& GameConst) 
     if(Dino.y < (GameConst.jumper_baseY-GameConst.jumper_jumpHeight)){
       Dino.y = (GameConst.jumper_baseY-GameConst.jumper_jumpHeight);
       Dino.food--;
+      Dino.food--;
       Dino.jump = 2;
     }
   } else if (Dino.jump==2){
@@ -422,7 +431,7 @@ void ShowScore(dGameStr& DinoGame){
   myOLED.setCursor(1,36);
   myOLED.print("All time best: ");
   int highscore;
-  EEPROM.get(DinoRecord, highscore);
+  EEPROM.get(Game_DinoRecord, highscore);
   myOLED.print(highscore);
   myOLED.display();
 }
@@ -439,10 +448,10 @@ void DisplayGameSummary(dGameStr& DinoGame, jumpStr& Dino) {
   myOLED.clearDisplay();
 
   int highscore;
-  EEPROM.get(DinoRecord, highscore);
+  EEPROM.get(Game_DinoRecord, highscore);
   score = score + Dino.food;
   if ((score > highscore)) {
-    EEPROM.put(DinoRecord, score);
+    EEPROM.put(Game_DinoRecord, score);
     EEPROM.commit();
   }
 
@@ -475,7 +484,7 @@ void JumpSound(){
   }
 }
 
-void ButtonsActions(dGameStr& DinoGame, jumpStr& Dino) {
+void CheckButtons(dGameStr& DinoGame, jumpStr& Dino) {
   if(IsPressed(UpLeft)) {
     DinoGame.spriteSetIndex++;
     if (DinoGame.spriteSetIndex > 1){
@@ -503,5 +512,6 @@ void ButtonsActions(dGameStr& DinoGame, jumpStr& Dino) {
 const GameInfo GameInfo_Dino = {
   "Dino",
   "Unikaj przeszkód, skacz dinozaurem!",
-  Game_Dino
+  Game_Dino,
+  Game_DinoRecord
 };

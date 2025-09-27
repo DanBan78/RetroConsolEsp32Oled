@@ -5,14 +5,11 @@
 
 // Tablica wskaźników do struktur z informacjami o grach
 const GameInfo* allGames[] = {
-    &GameInfo_Snoopy,
     &GameInfo_Dino,
+    &GameInfo_Snoopy,
+    &GameInfo_Slalom,  
     &GameInfo_HackMe,
     &GameInfo_Cymbergaj,
-    &GameInfo_Slalom,
-    &GameInfo_Wilk,
-    
-    //&GameInfo_SpaceShooter,
     &HelpInfo,
 
     // Dodaj kolejne gry: &GameInfo_SpaceShooter, &GameInfo_Slalom, ...

@@ -86,7 +86,7 @@ const unsigned char WYBUCH [] PROGMEM = {
   void displayMatrix(HackMeStruct& Game);
   void DisplayMixedCodeAndStartCountingDown(HackMeStruct& HackMeGame, timerStruct& Timer1Sec);
   void displayResolution(HackMeStruct& Game);
-  void hdisplaySound();
+  void hdisplaySoundInfo();
   void errorSound();
   void GameRestart(HackMeStruct& HackMeGame);
   void GenerateCode(HackMeStruct& Game, uint8_t ileZnakow);

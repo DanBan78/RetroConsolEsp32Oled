@@ -6,26 +6,25 @@ void Game_Snoopy() {
   eggLineStr allEggLines[4];
 
   Snoopy.sesionScore = 0;
-  GameLoop (Snoopy, allEggLines);
-}
-
-void GameLoop (snoopyStr& Snoopy, eggLineStr allEggLines[4]) {
   while (true) {
-    myOLED.clearDisplay();
-    SnoopyInit(Snoopy, allEggLines);
-    DrawSnoopy(Snoopy.direction, SH110X_BLACK);
-
-    AddNewEgg(allEggLines);
-    myOLED.display();
+    WelcomeSnoopyScreen();
+    SnoopyInit(Snoopy, allEggLines); 
+    WaitforButton();
     Snoopy.prevUpdateTime  = millis();
 
     while (Snoopy.lives!=0) {
-      displaySound(120, 0, soundEnabled);
-      if (ItsTimeForFrameUpdate(Snoopy)) {
-        UpdateEggsOnScreen(Snoopy, allEggLines);
-        for (int i = 0; i < 4; i++) CheckIfEggCatchOrNot(Snoopy, allEggLines[i]);
+      displaySoundInfo(120, 0, soundEnabled);
+      if (ItsTimeToMoveEgg(Snoopy)) {
+        DisplayEggsOnScreen(allEggLines);
+        CheckIfEggDropped(Snoopy, allEggLines);
+        // update game speed every 10 points
+        if (Snoopy.score > 30) Snoopy.frameUpdateRate = Snoopy.initFrameUpdateRate - (Snoopy.score/10)*10;
         if (Snoopy.lives == 0) break;
-        AddNewEggOrUpdateSpeed(Snoopy, allEggLines);
+        if (NewEggIsRequired(Snoopy, allEggLines)) {
+          for (int i = 0; i < 4; i++) {
+            DrawEggs(allEggLines[i], 1);
+          }
+        }
       }
       SnoopyDisplayScore(Snoopy);
       CheckIfSnopyMoved(Snoopy);
@@ -34,7 +33,28 @@ void GameLoop (snoopyStr& Snoopy, eggLineStr allEggLines[4]) {
   }
 }
 
-void AddNewEgg(eggLineStr allEggLines[4]) {
+void WelcomeSnoopyScreen() {
+  myOLED.clearDisplay();
+  myOLED.setTextColor(SH110X_WHITE);
+  myOLED.setTextSize(2);
+  myOLED.setCursor(2, 1);
+  myOLED.println("Snoopy");
+  myOLED.setTextSize(1);
+  myOLED.setCursor(0, 20);
+  myOLED.println("o > left up shelf");
+  myOLED.setCursor(0, 31);
+
+  myOLED.println("o > left down shelf");
+  myOLED.setCursor(2, 44);
+  myOLED.println("  right up shelf > o");
+  myOLED.setCursor(2, 55);
+
+  myOLED.println("right down shelf > o");
+  myOLED.display();
+  delay(DELAY2000MS);
+} 
+
+void AddFirstEgg(eggLineStr allEggLines[4]) {
   orientation newEggOnLine = (orientation)random(0, 4);
   allEggLines[newEggOnLine].position |= 1;
 }
@@ -51,24 +71,19 @@ void CheckIfSnopyMoved(snoopyStr& Snoopy) {
   DrawSnoopy(Snoopy.direction, SH110X_WHITE);
 }
 
-void ForceSnoopyDraw(orientation SnoopyPos, orientation Pos) {
-  DrawSnoopy(SnoopyPos, SH110X_BLACK);
-  DrawSnoopy(Pos, SH110X_WHITE);
-}
-
 void DrawSnoopy(orientation Pos, uint16_t color) {
     switch(Pos) {
     case sLeftDown:
-      myOLED.drawBitmap(31, 13, SnoopyLD, 50, 50, color);
+      myOLED.drawBitmap(30, 13, SnoopyLD, 50, 50, color);
       break;
     case sLeftUp:
       myOLED.drawBitmap(31, 10, SnoopyLU, 50, 50, color);
       break;
     case sRightDown:
-      myOLED.drawBitmap(43, 13, SnoopyRD, 50, 50, color);
+      myOLED.drawBitmap(45, 13, SnoopyRD, 50, 50, color);
       break;
     case sRightUp:
-      myOLED.drawBitmap(43, 10, SnoopyRU, 50, 50, color);
+      myOLED.drawBitmap(44, 10, SnoopyRU, 50, 50, color);
       break;
     case sWaiting:
       myOLED.drawBitmap(37, 10, SnoopySit, 50, 50, color);
@@ -88,38 +103,49 @@ void SnoopyDisplayScore(snoopyStr& Snoopy) {
   myOLED.print(Snoopy.score);
 }
 
-void UpdateEggsOnScreen(snoopyStr& Snoopy, eggLineStr allEggLines[4]) {
+void DisplayEggsOnScreen(eggLineStr allEggLines[4]) {
+  bool eggsOnScreen = false;
+
   for (int i = 0; i < 4; i++) {
-    DrawEggs(Snoopy, allEggLines[i], 0);
+    DrawEggs(allEggLines[i], 0);
     allEggLines[i].position = allEggLines[i].position << 1;
-    DrawEggs(Snoopy, allEggLines[i], 1);
+    DrawEggs(allEggLines[i], 1);
   }
+  for (int i = 0; i < 4; i++) {
+    if (allEggLines[i].position != 0) {
+      eggsOnScreen = true;
+      break;
+    }
+  }
+  if (soundEnabled && eggsOnScreen) {
+    MyTune(TON_EGG_FREQ, TON_EGG_CZAS);
+  } else delay(TON_EGG_CZAS);
 }
 
-void DrawEggs(snoopyStr& Snoopy, eggLineStr& eggLine, uint16_t color){
-  for (int i=0; i<6; i++) {
+void DrawEggs( eggLineStr& eggLine, uint16_t color){
+  for (int i=0; i<7; i++) {
     if ((eggLine.position & (1 << i)) != 0) {
-      int x=0+i*7; 
-      int y=18+i;
+      int x=0+i*5; 
+      int y=17+i;
       switch(eggLine.direction) {
         case sLeftUp:
-          myOLED.drawCircle(x, y, 2, color);
+          myOLED.drawCircle(x, y, EGG_DIMENSION, color);
         break;
         case sLeftDown:
-          myOLED.drawCircle(x, y+20, 2, color);
+          myOLED.drawCircle(x, y+20, EGG_DIMENSION, color);
         break;
         case sRightUp:
-          myOLED.drawCircle(127-x, y, 2, color);
+          myOLED.drawCircle(127-x, y, EGG_DIMENSION, color);
         break;
         case sRightDown:
-          myOLED.drawCircle(127-x, y+20, 2, color);
+          myOLED.drawCircle(127-x, y+20, EGG_DIMENSION, color);
         break;
       }
     }
   }
 }
 
-bool ItsTimeForFrameUpdate(snoopyStr& Snoopy) {
+bool ItsTimeToMoveEgg(snoopyStr& Snoopy) {
   if (millis()- Snoopy.prevUpdateTime > (Snoopy.frameUpdateRate)) {
     Snoopy.prevUpdateTime  = millis();
     return true;
@@ -129,56 +155,57 @@ bool ItsTimeForFrameUpdate(snoopyStr& Snoopy) {
 
 void SnoopyInit(snoopyStr& Snoopy, eggLineStr allEggLines[4]) {
   myOLED.clearDisplay();
-  myOLED.setTextColor(SH110X_WHITE);
-  myOLED.setTextSize(1);
-  myOLED.setCursor(10, 1);
   //draw lives circles
   myOLED.drawCircle(2, 58, 2, SH110X_WHITE);
   myOLED.drawCircle(10, 58, 2, SH110X_WHITE);
   myOLED.drawCircle(18, 58, 2, SH110X_WHITE);
   //draw lines
-  myOLED.drawLine(0,21, 30, 26, SH110X_WHITE);
-  myOLED.drawLine(0,22, 30, 27, SH110X_WHITE);
-  myOLED.drawLine(0,21+20, 30, 26+20, SH110X_WHITE);
-  myOLED.drawLine(0,22+20, 30, 27+20, SH110X_WHITE);
-  myOLED.drawLine(127,21, 123-30, 26, SH110X_WHITE);
-  myOLED.drawLine(127,22, 123-30, 27, SH110X_WHITE);
-  myOLED.drawLine(127,21+20,123- 30, 26+20, SH110X_WHITE);
-  myOLED.drawLine(127,22+20,123- 30, 27+20, SH110X_WHITE);
-  DrawSnoopy(Snoopy.direction, SH110X_WHITE);
+  int y = 21, dy0 = 5, dy1 = 20, dx = 30;
+  for (int line = 0; line < 2; line++) {           // 2 linie (góra/dół)
+    for (int thick = 0; thick < 2; thick++) {      // podwójna grubość
+      int currentY = y + line * dy1 + thick;
+      myOLED.drawLine(0, currentY, dx, currentY + dy0, SH110X_WHITE);           // lewa
+      myOLED.drawLine(127, currentY, 127-dx, currentY + dy0, SH110X_WHITE);     // prawa  
+    }
+  }
   // init values
   Snoopy.lives = 3;
   Snoopy.score = 0;
-  Snoopy.direction   = sWaiting;
+  Snoopy.direction = sResting;
   Snoopy.frameUpdateRate = Snoopy.initFrameUpdateRate;
-  allEggLines[sLeftUp].position    = 0; allEggLines[sLeftUp].direction    = sLeftUp;
-  allEggLines[sLeftDown].position  = 0; allEggLines[sLeftDown].direction  = sLeftDown;
-  allEggLines[sRightUp].position   = 0; allEggLines[sRightUp].direction   = sRightUp;
-  allEggLines[sRightDown].position = 0; allEggLines[sRightDown].direction = sRightDown;
+  SnoopyDisplayScore(Snoopy);
+  DrawSnoopy(Snoopy.direction, SH110X_WHITE);
+
+  ClearEggLines(allEggLines);
+  AddFirstEgg(allEggLines);
   myOLED.display();
 }
 
-void CheckIfEggCatchOrNot(snoopyStr& Snoopy, eggLineStr& eggLine) {
-  if ((eggLine.position & 64) == 64) {
-    if (Snoopy.direction == eggLine.direction) {
-      Snoopy.score ++;
-      if(soundEnabled) MyTune(TON_POINT_FREQ, TON_POINT_CZAS);
-    } else {
-      Snoopy.lives --;
-      DisplayBrokenEgg(Snoopy, eggLine.direction);
-      if (Snoopy.lives == 0) {
-        myOLED.clearDisplay();
-        myOLED.setTextColor(SH110X_WHITE);
-        myOLED.setTextSize(1);
-        myOLED.setCursor(10, 1);
-        myOLED.println(F("Koniec gry!"));
-        myOLED.setCursor(10, 20);
-        myOLED.print(F("Wynik: "));
-        myOLED.print(Snoopy.score);
-        myOLED.setCursor(10, 40);
-        myOLED.display();
-        delay(DELAY250MS);
-        WaitforButton();
+void ClearEggLines(eggLineStr allEggLines[4]) {
+  for (int i = 0; i < 4; i++) {
+    DrawEggs(allEggLines[i], 0);
+    allEggLines[i].position = 0;
+    allEggLines[i].direction = (orientation)i;
+  }
+}
+
+void CheckIfEggDropped(snoopyStr& Snoopy, eggLineStr allEggLines[4]) {
+  for (int i = 0; i < 4; i++) {
+    if ((allEggLines[i].position & 128) == 128) {
+      if (Snoopy.direction == allEggLines[i].direction) {
+        Snoopy.score++;
+        if(soundEnabled) {
+          MyTune(TON_POINT_FREQ, TON_POINT_CZAS);
+        } else delay(TON_POINT_CZAS);
+      } else {
+        Snoopy.lives --;
+        DisplayBrokenEgg(Snoopy, allEggLines[i].direction);
+
+        if (Snoopy.lives == 0) {
+          DisplayGameOverSnoopy(Snoopy);
+          WaitforButton();
+        }
+        ClearEggLines(allEggLines);
       }
     }
   }
@@ -192,13 +219,12 @@ void DisplayBrokenEgg(snoopyStr& Snoopy, orientation pos) {
   if (pos == sRightUp || pos == sRightDown) {
     x = 75;
   } else x = 30;
-
   if (pos == sLeftUp || pos == sRightUp) {
-    myOLED.drawCircle(x + 5, z, 2, SH110X_WHITE);
+    myOLED.drawCircle(x + 5, z, EGG_DIMENSION, SH110X_WHITE);
     myOLED.display();
     delay(DELAY250MS);
   }
-  myOLED.drawCircle(x + 5, z, 2, SH110X_BLACK);
+  myOLED.drawCircle(x + 5, z, EGG_DIMENSION, SH110X_BLACK);
   DrawSnoopy(Snoopy.direction, SH110X_BLACK);
   Snoopy.direction = sWaiting;
   DrawSnoopy(Snoopy.direction, SH110X_WHITE);
@@ -212,8 +238,7 @@ void DisplayBrokenEgg(snoopyStr& Snoopy, orientation pos) {
   myOLED.drawCircle(2 + Snoopy.lives * 8, 58, 2, SH110X_BLACK);
 }
 
-void AddNewEggOrUpdateSpeed(snoopyStr& Snoopy, eggLineStr allEggLines[4]) {
-  bool eggAdded = false;
+bool NewEggIsRequired(snoopyStr& Snoopy, eggLineStr allEggLines[4]) {
   uint8_t totalEggsPos = 0;
   uint8_t eggsOnLinesCount = 0;
   orientation randomLineForNewEgg;
@@ -222,38 +247,80 @@ void AddNewEggOrUpdateSpeed(snoopyStr& Snoopy, eggLineStr allEggLines[4]) {
     eggsOnLinesCount += __builtin_popcount(allEggLines[i].position);
     totalEggsPos |= allEggLines[i].position;
   }
-  if ((totalEggsPos > 0) && soundEnabled) MyTune(TON_EGG_FREQ, TON_EGG_CZAS);
-  if (Snoopy.score < 7) {
-    if (eggsOnLinesCount == 0) AddNewEgg(allEggLines);
-    eggAdded = true;
-  } else if (Snoopy.score < 20) {
-    if (eggsOnLinesCount < 2) {
-      if (!(totalEggsPos > 0 && totalEggsPos < 8)) {
-        AddNewEgg(allEggLines);
-        eggAdded = true;
-      }
+
+  if (Snoopy.score < 5 || totalEggsPos == 128 || eggsOnLinesCount == 0) {
+    if ((totalEggsPos == 128 && eggsOnLinesCount == 1) || (eggsOnLinesCount == 0)) {
+      AddFirstEgg(allEggLines);
+      return true;
     }
-  } else if ((Snoopy.score > 19) && (eggsOnLinesCount < 3)) {
-    while (!eggAdded) {
+    return false;
+
+  } else if (Snoopy.score < 20 || eggsOnLinesCount == 1) {
+    if ((totalEggsPos & 0b00000111) != 0 || (eggsOnLinesCount == 2)) return false;
+    AddFirstEgg(allEggLines);
+    return true;
+
+  } else if ((Snoopy.score >= 20) && (eggsOnLinesCount == 2)) {
+    if ((totalEggsPos & 0b00000111) != 0) return false;
+    while (1) {
       randomLineForNewEgg = (orientation)random(0, 4);
-      if (allEggLines[randomLineForNewEgg].position > 4 || allEggLines[randomLineForNewEgg].position == 0) {
+      if ((allEggLines[randomLineForNewEgg].position & 0b00000111) == 0) {
         allEggLines[randomLineForNewEgg].position |= 1;
-        eggAdded = true;
+        return true;
       }
     }
   }
-  if (Snoopy.score > 30) Snoopy.frameUpdateRate = Snoopy.initFrameUpdateRate - Snoopy.score/3*2;
-  if (eggAdded) {
-    for (int i = 0; i < 4; i++) {
-      DrawEggs(Snoopy, allEggLines[i], 1);
-    }
-    myOLED.display();
+  return false;
+}
+
+void DisplayGameOverSnoopy(snoopyStr& Snoopy) {
+  // Aktualizuj session score
+  if (Snoopy.score > Snoopy.sesionScore) {
+    Snoopy.sesionScore = Snoopy.score;
   }
-  return;
+  
+  // Sprawdź i zapisz highscore
+  int highscore;
+  EEPROM.get(Game_SnoopyRecord, highscore);
+  
+  // Walidacja - jeśli EEPROM niezainicjalizowane, ustaw 0
+  if (highscore < 0 || highscore > 9999) {
+    highscore = 0;
+  }
+  
+  if (Snoopy.score > highscore) {
+    EEPROM.put(Game_SnoopyRecord, Snoopy.score);
+    EEPROM.commit();
+    highscore = Snoopy.score; // Aktualizuj lokalną wartość dla wyświetlenia
+  }
+  
+  // Wyświetl ekran końca gry
+  delay(500);
+  myOLED.clearDisplay();
+  myOLED.setTextColor(SH110X_WHITE);
+  myOLED.setTextSize(2);
+  myOLED.setCursor(10, 5);
+  myOLED.println(F("Game Over"));
+  
+  myOLED.setTextSize(1);
+  myOLED.setCursor(5, 25);
+  myOLED.print(F("Your score: "));
+  myOLED.print(Snoopy.score);
+  
+  myOLED.setCursor(5, 37);
+  myOLED.print(F("Session best: "));
+  myOLED.print(Snoopy.sesionScore);
+  
+  myOLED.setCursor(5, 49);
+  myOLED.print(F("All time best: "));
+  myOLED.print(highscore);
+  
+  myOLED.display();
 }
 
 const GameInfo GameInfo_Snoopy = {
   "Snoopy",
   "klasyczne lapanie jajek",
-  Game_Snoopy
+  Game_Snoopy,
+  Game_SnoopyRecord
 };

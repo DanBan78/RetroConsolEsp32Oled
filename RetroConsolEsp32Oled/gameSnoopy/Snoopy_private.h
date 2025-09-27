@@ -3,7 +3,9 @@
 
 	extern const GameInfo GameInfo_Snoopy;
 	enum orientation { sLeftUp = 0, sLeftDown = 1, sRightUp = 2, sRightDown = 3, sResting = 4, sWaiting = 5 };
-	
+
+	#define EGG_DIMENSION 3
+
 	typedef struct eggLineStr {
 		uint8_t position = 0;
 		orientation direction = sWaiting;
@@ -20,19 +22,21 @@
 	};
 
 	void Game_Snoopy();
-	bool ItsTimeForFrameUpdate(snoopyStr& Snoopy);
+	bool ItsTimeToMoveEgg(snoopyStr& Snoopy);
 	void SnoopyInit(snoopyStr& Snoopy, eggLineStr allEggLines[4]);
 	void GameLoop (snoopyStr& Snoopy, eggLineStr allEggLines[4]);
-    void DrawEggs(snoopyStr& Snoopy, eggLineStr& eggLine, uint16_t color);
-	void CheckIfEggCatchOrNot(snoopyStr& Snoopy, eggLineStr& eggLine);
+    void DrawEggs(eggLineStr& eggLine, uint16_t color);
+	void CheckIfEggDropped(snoopyStr& Snoopy, eggLineStr allEggLines[4]);
+	void DisplayGameOverSnoopy(snoopyStr& Snoopy);
 	void SnoopyDisplayScore(snoopyStr& Snoopy);
 	void DrawSnoopy(orientation Pos, uint16_t color);
 	void CheckIfSnopyMoved(snoopyStr& Snoopy);
-	void ForceSnoopyDraw(orientation SnoopyPos, orientation Pos);
 	void DisplayBrokenEgg(snoopyStr& Snoopy, orientation pos);
-    void UpdateEggsOnScreen(snoopyStr& Snoopy, eggLineStr allEggLines[4]);
-	void AddNewEggOrUpdateSpeed(snoopyStr& Snoopy, eggLineStr allEggLines[4]);
-	void AddNewEgg(eggLineStr allEggLines[4]);
+    void DisplayEggsOnScreen(eggLineStr allEggLines[4]);
+	bool NewEggIsRequired(snoopyStr& Snoopy, eggLineStr allEggLines[4]);
+	void AddFirstEgg(eggLineStr allEggLines[4]);
+	void ClearEggLines(eggLineStr allEggLines[4]);
+	void WelcomeSnoopyScreen();
 
 // 'LD', 50x50px
 const unsigned char SnoopyLD [] PROGMEM = {

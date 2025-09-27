@@ -192,6 +192,5 @@ const unsigned char Wrak [] PROGMEM = {
 	void checkIfGameOver();
 	void GameOverSlalomDisplay();
 	void AddPlamaOleju();
-	void demoSounds();
-
-    #endif
+	void WelcomeSlalomScreen();
+ #endif

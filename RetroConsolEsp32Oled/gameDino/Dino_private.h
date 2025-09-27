@@ -50,7 +50,7 @@
     uint8_t baselineY;
     uint8_t maxspeed;
     uint8_t obst_y; 
-    uint8_t jumper_foodInit;
+    int16_t jumper_foodInit;
     uint8_t jumper_baseX;
     uint8_t jumper_baseY;
     uint8_t jumper_xColRange;
@@ -66,7 +66,7 @@
     int16_t  	y;
     bool state = true;
     bool colision = false;
-    uint16_t 	food;
+    int16_t 	food;
     uint8_t 	jump; // 0 - not jumping, 1 - going up, 2 - going down
     bool jumpType = false; // false - long jump, true - high jump
     uint8_t  	jumpStartX;
@@ -81,7 +81,7 @@
 
   void Game_Dino();
   bool CheckIfTreeCollision(dGameStr& DinoGame, jumpStr& Dino, obstStr& tree, const GameConstStr& GameConst);
-  void ButtonsActions(dGameStr& DinoGame, jumpStr& Dino);
+  void CheckButtons(dGameStr& DinoGame, jumpStr& Dino);
   void CalcAeroXYpos(dGameStr& DinoGame, aeroStr& Aero, const GameConstStr& GameConst);
   void CalcGameSpeed(dGameStr& DinoGame, const GameConstStr& GameConst);
   void CalcTreesXpos (dGameStr& DinoGame, obstStr& obst1, obstStr& obst2, const GameConstStr& GameConst);

@@ -473,5 +473,6 @@ void DisplayGoal(cymGameStruct& CymGame, cymBallStruct& Ball, cymPlayerStruct& L
 const GameInfo GameInfo_Cymbergaj = {
   "Cymbergaj",
   "Klasyczny air hockey na OLED",
-  Game_Cymbergaj
+  Game_Cymbergaj,
+  Game_CymbergajRecord
 };
