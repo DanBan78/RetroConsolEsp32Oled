@@ -3,7 +3,10 @@
 
 #include "../global/global.h"
 
+namespace HackMeGame {
 	void Game_HackMe();
-	extern const GameInfo GameInfo_HackMe;
+}
+
+extern const GameInfo GameInfo_HackMe;
 
 #endif

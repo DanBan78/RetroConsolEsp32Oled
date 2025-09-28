@@ -73,6 +73,7 @@ const unsigned char WYBUCH [] PROGMEM = {
 };
   //void checkfreemem();
 
+namespace HackMeGame {
   bool checkForTimeoutAndDisplayCurrTime(timerStruct& Timer1Sec);
   bool DigitIsWrong(HackMeStruct& Game);
   bool FirstDigitIsWrong(HackMeStruct& Game, timerStruct& Timer1Sec);
@@ -101,5 +102,6 @@ const unsigned char WYBUCH [] PROGMEM = {
   void timeEndedGameOver(HackMeStruct& HackMeGame, timerStruct& Timer1Sec);
   void Timer_Interrupt(timerStruct& t);
   void WelcomeHackMeScreen();
+}
 
 #endif

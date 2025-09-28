@@ -4,9 +4,9 @@
 	extern const GameInfo GameInfo_Snoopy;
 	enum orientation { sLeftUp = 0, sLeftDown = 1, sRightUp = 2, sRightDown = 3, sResting = 4, sWaiting = 5 };
 
-	#define EGG_DIMENSION 3
+	#define Ball_DIMENSION 3
 
-	typedef struct eggLineStr {
+	typedef struct BallLineStr {
 		uint8_t position = 0;
 		orientation direction = sWaiting;
 	};
@@ -22,21 +22,22 @@
 	};
 
 	void Game_Snoopy();
-	bool ItsTimeToMoveEgg(snoopyStr& Snoopy);
-	void SnoopyInit(snoopyStr& Snoopy, eggLineStr allEggLines[4]);
-	void GameLoop (snoopyStr& Snoopy, eggLineStr allEggLines[4]);
-    void DrawEggs(eggLineStr& eggLine, uint16_t color);
-	void CheckIfEggDropped(snoopyStr& Snoopy, eggLineStr allEggLines[4]);
+namespace SnoopyGame {
+	bool ItsTimeToMoveBall(snoopyStr& Snoopy);
+	void SnoopyInit(snoopyStr& Snoopy, BallLineStr allBallLines[4]);
+    void DrawBalls(BallLineStr& BallLine, uint16_t color);
+	void CheckIfBallDropped(snoopyStr& Snoopy, BallLineStr allBallLines[4]);
 	void DisplayGameOverSnoopy(snoopyStr& Snoopy);
 	void SnoopyDisplayScore(snoopyStr& Snoopy);
 	void DrawSnoopy(orientation Pos, uint16_t color);
 	void CheckIfSnopyMoved(snoopyStr& Snoopy);
-	void DisplayBrokenEgg(snoopyStr& Snoopy, orientation pos);
-    void DisplayEggsOnScreen(eggLineStr allEggLines[4]);
-	bool NewEggIsRequired(snoopyStr& Snoopy, eggLineStr allEggLines[4]);
-	void AddFirstEgg(eggLineStr allEggLines[4]);
-	void ClearEggLines(eggLineStr allEggLines[4]);
+	void DisplayBrokenBall(snoopyStr& Snoopy, orientation pos);
+    void DisplayBallsOnScreen(BallLineStr allBallLines[4]);
+	bool NewBallIsRequired(snoopyStr& Snoopy, BallLineStr allBallLines[4]);
+	void AddFirstBall(BallLineStr allBallLines[4]);
+	void ClearBallLines(BallLineStr allBallLines[4]);
 	void WelcomeSnoopyScreen();
+}
 
 // 'LD', 50x50px
 const unsigned char SnoopyLD [] PROGMEM = {
@@ -187,7 +188,7 @@ const unsigned char SnoopyNap [] PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0xe7, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 // 23x16 px
-const uint8_t BrokenEgg_bmp[] PROGMEM = {
+const uint8_t BrokenBall_bmp[] PROGMEM = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 
     0x30, 0x00, 0x03, 0x31, 0x00, 0x01, 0xe7, 0x00, 0x30, 0xff, 0x00, 0x79, 0xce, 0x20, 0x5b, 0xc4, 
     0x78, 0x78, 0xe6, 0x68, 0x11, 0xba, 0x38, 0x03, 0xf7, 0x30, 0x00, 0xcc, 0x00, 0x00, 0x00, 0x00};

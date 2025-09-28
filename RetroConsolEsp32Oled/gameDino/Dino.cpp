@@ -1,6 +1,8 @@
 #include "Dino.h"
 #include "Dino_private.h"
 
+namespace DinoGame {
+
   SpriteSetStr Skins[2] = {
     {dino1, dino2, dino3, obst1, obst2, aero1, aero2, aero3, "Auuuc!!"},      // zestaw 1
     {cat1, cat2, cat3, murek1, murek2, bird1, bird2, bird3, "Miau!"} // zestaw 2
@@ -14,31 +16,13 @@
     score = 0;
   
     while(true){
-      static const GameConstStr GameConst = {
-        .first_obst_x = 100,
-        .new_obst_x_init = 130,
-        .min_obst_dist = 10,
-        .baselineY = 60,
-        .maxspeed = 20,
-        .obst_y = 37,
-        .jumper_foodInit = 8,
-        .jumper_baseX = 10,
-        .jumper_baseY = 34,
-        .jumper_xColRange = 6,
-        .jumper_width = 25,
-        .jumper_height = 26,
-        .jumper_jumpHeight = 24,
-        .aero_width = 16,
-        .aero_height = 10,
-        .aero_initY = 12
-      };
+      static const GameConstStr GameConst;
       DinoGame.sessionScore = 0;
-      Dino.colision = false;
 
       DisplayWelcomeScreen();
       while (1) {
         InitValuesAfterReplay(DinoGame, Dino, Aero, obst1, obst2, GameConst);
-        delay(DELAY2000MS);
+        delay(DELAY1500MS);
         FirstGameFrame(DinoGame, Dino, obst1, obst2, GameConst);
 
         PlayGame(DinoGame, Dino, Aero, obst1, obst2, GameConst);
@@ -132,10 +116,7 @@ void PlayGame(dGameStr& DinoGame, jumpStr& Dino, aeroStr& Aero, obstStr& obst1, 
   while (true) {
     myOLED.clearDisplay();
     CheckButtons(DinoGame, Dino);
-
-    if ((Dino.food <= 0)){
-      if (Dino.jump == 1) Dino.jump = 0;
-    }
+    if ((Dino.food <= 0) && (Dino.jump == 1)) Dino.jump = 0;
     if (Dino.jump != 0) {
       if (Dino.jumpType) {
         JumpHigh(DinoGame, Dino, GameConst);
@@ -148,8 +129,7 @@ void PlayGame(dGameStr& DinoGame, jumpStr& Dino, aeroStr& Aero, obstStr& obst1, 
     CalcTreesXpos(DinoGame, obst1, obst2, GameConst);
     CalcAeroXYpos(DinoGame, Aero, GameConst);
     CalcGameSpeed(DinoGame, GameConst);
-    if (CheckIfTreeCollision(DinoGame, Dino, obst1, GameConst) || CheckIfTreeCollision(DinoGame, Dino, obst2, GameConst)) Dino.colision = true;
-    if (Dino.colision) {
+    if (CheckIfTreeCollision(DinoGame, Dino, obst1, GameConst) || CheckIfTreeCollision(DinoGame, Dino, obst2, GameConst)) {
       GameOverTreeColisionDetected(DinoGame, Dino, GameConst);
       myOLED.display();
       delay(50);
@@ -509,9 +489,11 @@ void CheckButtons(dGameStr& DinoGame, jumpStr& Dino) {
   }
 }
 
+} // namespace DinoGame
+
 const GameInfo GameInfo_Dino = {
   "Dino",
   "Unikaj przeszkód, skacz dinozaurem!",
-  Game_Dino,
+  DinoGame::Game_Dino,
   Game_DinoRecord
 };

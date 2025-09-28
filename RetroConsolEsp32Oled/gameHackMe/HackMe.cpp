@@ -1,6 +1,7 @@
 #include "HackMe.h"
 #include "HackMe_private.h"
 
+namespace HackMeGame {
 
 void Game_HackMe() {
   HackMeStruct HackMeGame;
@@ -473,7 +474,7 @@ void WelcomeHackMeScreen() {
 
   myOLED.println("    Enter > o");
   myOLED.display();
-  delay(DELAY2000MS);
+  delay(DELAY1500MS);
 } 
 
 void GenerateRandomCodeMatrix(HackMeStruct& HackMeGame) {
@@ -548,9 +549,11 @@ void selectFirstRowCol(HackMeStruct& HackMeGame) {
   HackMeGame.SelectedCol = 0;
 }
 
+} // namespace HackMeGame
+
 const GameInfo GameInfo_HackMe = {
   "Disarm the bomb",
   "Rozbroj bombe wbijajac kod",
-  Game_HackMe,
+  HackMeGame::Game_HackMe,
   -1  // HackMe nie zapisuje highscore
 };

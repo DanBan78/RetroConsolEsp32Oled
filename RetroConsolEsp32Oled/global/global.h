@@ -9,13 +9,18 @@
   #include <Wire.h>
   #include <pgmspace.h>
   #include <Fonts/TomThumb.h>
+  #include <esp_sleep.h>
+  #include <driver/gpio.h>
+  #include <driver/rtc_io.h>
 
   #define HALT while(1)
 	#define OLED_RESET     -1    // Reset pin # (or -1 if sharing Arduino reset pin)
 	#define SCREEN_ADDRESS 0x3C
 	#define SCREEN_WIDTH   128  // OLED display width, in pixels
-	#define SCREEN_HEIGHT  64   // OLED display height, in pixels
+  #define SCREEN_HEIGHT  64   // OLED display height, in pixels
   #define maxMenuRowsOnScreen 5
+
+  #define SLEEP_TIMEOUT_MS 600000  // 10 minut
 
   extern Adafruit_SH1106G myOLED;
 
@@ -27,7 +32,10 @@
   extern int GameSelected;
   extern int score;
   extern int SessionScore;
+
   extern const int totalGamesNo;
+  extern unsigned long lastButtonPress;
+  extern bool sleepModeActive;
 
   // Buttons
   #define BTN_1  1
@@ -89,9 +97,17 @@ const char str10[] PROGMEM = "RightDown";
 const char str11[] PROGMEM = "enter / start gry";
 const char str12[] PROGMEM = "WSZYSTKIE NA RAZ ";
 const char str13[] PROGMEM = "powrot do wyboru gry";
+const char str14[] PROGMEM = "gra usypia po 10 min";
+const char str15[] PROGMEM = "bezczynnosci";
+const char str16[] PROGMEM = "wyl/wl aby obudzic";
+const char str17[] PROGMEM = "dla Piotra od Daniela";
+const char str18[] PROGMEM = "dziekuje za pomoc i";
+const char str19[] PROGMEM = "cierpliwosc";
+const char str20[] PROGMEM = "przyjacielu";
 
+const char* const teksty[] PROGMEM = { str0, str1, str2, str3, str4, str5,
+   str6, str7, str8, str9, str10, str11, str12, str13, str14, str15, str16, str17, str18, str19, str20 };
 
-const char* const teksty[] PROGMEM = { str0, str1, str2, str3, str4, str5, str6, str7, str8, str9, str10, str11, str12, str13 };
   btPressedCode ReadButton(void (*callback)(timerStruct&),timerStruct& t);
   bool IsPressed(btPressedCode button);
   bool CheckIfTimePassed(unsigned long& LastTimeCheckOneSec, unsigned long interval);
@@ -107,7 +123,10 @@ const char* const teksty[] PROGMEM = { str0, str1, str2, str3, str4, str5, str6,
   void CheckIfResetHighscores();
   void DisplayHighscores();
   void SerialPrintFreeRam();
-
+  bool checkForSleep();
+  bool isSleeping();
+  void wakeFromSleep();
+  void enterSleepMode();
   void (*FuncPointer)(timerStruct&);
   
 	// Dźwięki
@@ -136,8 +155,8 @@ const char* const teksty[] PROGMEM = { str0, str1, str2, str3, str4, str5, str6,
   #define TON_PUNKT_FREQ  110
   #define TON_RAMKA_CZAS  50
   #define TON_RAMKA_FREQ  1320
-  #define TON_EGG_FREQ 400
-	#define TON_EGG_CZAS 10
+  #define TON_Ball_FREQ 400
+	#define TON_Ball_CZAS 10
   #define TON_START_CZAS  TON_RAMKA_CZAS
   #define TON_START_FREQ  TON_RAMKA_FREQ
 #endif

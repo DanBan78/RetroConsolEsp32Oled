@@ -3,7 +3,10 @@
 
 #include "../global/global.h"
 
-  extern const GameInfo GameInfo_Cymbergaj;
+namespace CymbergajGame {
   void Game_Cymbergaj();
+}
+
+extern const GameInfo GameInfo_Cymbergaj;
 
 #endif

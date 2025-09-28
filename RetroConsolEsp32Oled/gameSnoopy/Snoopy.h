@@ -3,7 +3,9 @@
 
   #include "../global/global.h"
 
+namespace SnoopyGame {
   void Game_Snoopy();
+}
   
   extern const GameInfo GameInfo_Snoopy;
 

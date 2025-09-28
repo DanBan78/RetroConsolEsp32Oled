@@ -3,7 +3,10 @@
 
 #include "../global/global.h"
 
+namespace DinoGame {
   void Game_Dino();
-  extern const GameInfo GameInfo_Dino;
+}
+
+extern const GameInfo GameInfo_Dino;
 
 #endif

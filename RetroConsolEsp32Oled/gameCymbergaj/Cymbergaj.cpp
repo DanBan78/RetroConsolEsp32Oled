@@ -1,6 +1,8 @@
 #include "Cymbergaj.h"
 #include "Cymbergaj_private.h"
 
+namespace CymbergajGame {
+
 unsigned long temp;
 
 // Główna pętla
@@ -219,7 +221,7 @@ void UpdateBallPos(cymGameStruct& CymGame, cymBallStruct& Ball, cymPlayerStruct&
   Ball.prevX = Ball.x;
   Ball.prevY = Ball.y;
   UpdateBallPosAndCheckBandOrGoal(CymGame, Ball, LeftPlayer, RightPlayer);
-  if (CymGame.ballSpeed == Szybko) {
+  if (CymGame.BallSpeed == Szybko) {
     UpdateBallPosAndCheckBandOrGoal(CymGame, Ball, LeftPlayer, RightPlayer);
   }
   CymGame.updateScreen = true;
@@ -358,7 +360,7 @@ void UpdateBallYpos(cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerS
 bool ItsTimeForPadlePosUpdate(cymGameStruct& CymGame) {
   unsigned long FinalUpdateRate = CymGame.playerPadlePosUpdateRate;
 
-  if (CymGame.ballSpeed == Szybko) FinalUpdateRate = CymGame.playerPadlePosUpdateRate / 2;
+  if (CymGame.BallSpeed == Szybko) FinalUpdateRate = CymGame.playerPadlePosUpdateRate / 2;
 
   if (millis()-CymGame.playerPadlePosPrevUpdateTime > (FinalUpdateRate)) {
       CymGame.playerPadlePosPrevUpdateTime  = millis();
@@ -470,9 +472,11 @@ void DisplayGoal(cymGameStruct& CymGame, cymBallStruct& Ball, cymPlayerStruct& L
   myOLED.setTextColor(SH110X_WHITE);
 };
 
+} // namespace CymbergajGame
+
 const GameInfo GameInfo_Cymbergaj = {
   "Cymbergaj",
   "Klasyczny air hockey na OLED",
-  Game_Cymbergaj,
+  CymbergajGame::Game_Cymbergaj,
   Game_CymbergajRecord
 };

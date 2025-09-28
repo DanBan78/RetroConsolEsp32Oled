@@ -165,13 +165,14 @@ const unsigned char Wrak [] PROGMEM = {
 	0x20, 0x70, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
+namespace SlalomGame {
 	void Pause();
-	void DisplayInitTrack();
-	void DisplaySprite(int row, int column, SpriteCode Sprite);
+	void DisplayInitTrack(uint8_t color);
+	void DisplaySprite(int row, int column, SpriteCode Sprite, uint8_t color);
 	void GetSprite_x_y(int row, int column, int *x, int *y);
 	void DisplayCar(int car_x);
 	void DisplayRoad();
-	void LivesLeftDisplay(int k);
+	void LivesLeftDisplay(int k, uint8_t color);
 	void GameSlalomInit();
  	void displayPoints();
 	void display_roadLine();
@@ -191,6 +192,11 @@ const unsigned char Wrak [] PROGMEM = {
 	void CalculateGameSpeedAndLevel();
 	void checkIfGameOver();
 	void GameOverSlalomDisplay();
-	void AddPlamaOleju();
+	void AddFuelStation();
 	void WelcomeSlalomScreen();
+	void DrawAddedFuelStation(uint8_t color);
+	bool CheckButtonsSlalom();
+	bool CheckFuelBlink();
+}
+
  #endif

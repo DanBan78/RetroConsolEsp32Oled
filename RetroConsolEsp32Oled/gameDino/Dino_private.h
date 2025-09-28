@@ -43,29 +43,46 @@
 
   extern SpriteSetStr Skins[2];
 
+  // struct GameConstStr {
+  //   uint8_t first_obst_x;
+  //   uint8_t new_obst_x_init;
+  //   uint8_t min_obst_dist;
+  //   uint8_t baselineY;
+  //   uint8_t maxspeed;
+  //   uint8_t obst_y; 
+  //   int16_t jumper_foodInit;
+  //   uint8_t jumper_baseX;
+  //   uint8_t jumper_baseY;
+  //   uint8_t jumper_xColRange;
+  //   uint8_t jumper_width;
+  //   uint8_t jumper_height;
+  //   uint8_t jumper_jumpHeight;
+  //   uint8_t aero_width;
+  //   uint8_t aero_height;
+  //   uint8_t aero_initY;
+  // };
   struct GameConstStr {
-    uint8_t first_obst_x;
-    uint8_t new_obst_x_init;
-    uint8_t min_obst_dist;
-    uint8_t baselineY;
-    uint8_t maxspeed;
-    uint8_t obst_y; 
-    int16_t jumper_foodInit;
-    uint8_t jumper_baseX;
-    uint8_t jumper_baseY;
-    uint8_t jumper_xColRange;
-    uint8_t jumper_width;
-    uint8_t jumper_height;
-    uint8_t jumper_jumpHeight;
-    uint8_t aero_width;
-    uint8_t aero_height;
-    uint8_t aero_initY;
+    uint8_t first_obst_x = 100;
+    uint8_t new_obst_x_init = 130;
+    uint8_t min_obst_dist = 10;
+    uint8_t baselineY = 60;
+    uint8_t maxspeed = 20;
+    uint8_t obst_y = 37;
+    int16_t jumper_foodInit = 8;
+    uint8_t jumper_baseX = 10;
+    uint8_t jumper_baseY = 34;
+    uint8_t jumper_xColRange = 6;
+    uint8_t jumper_width = 25;
+    uint8_t jumper_height = 26;
+    uint8_t jumper_jumpHeight = 24;
+    uint8_t aero_width = 16;
+    uint8_t aero_height = 10;
+    uint8_t aero_initY = 12;
   };
 
   struct jumpStr {
     int16_t  	y;
     bool state = true;
-    bool colision = false;
     int16_t 	food;
     uint8_t 	jump; // 0 - not jumping, 1 - going up, 2 - going down
     bool jumpType = false; // false - long jump, true - high jump
@@ -79,6 +96,7 @@
     uint8_t spriteSetIndex = 0;
   };
 
+namespace DinoGame {
   void Game_Dino();
   bool CheckIfTreeCollision(dGameStr& DinoGame, jumpStr& Dino, obstStr& tree, const GameConstStr& GameConst);
   void CheckButtons(dGameStr& DinoGame, jumpStr& Dino);
@@ -105,6 +123,7 @@
   void ShowScore(dGameStr& DinoGame);
   void TurboSpeed(dGameStr& DinoGame, int direction, int16_t* sprite);
   void UpdateGameFrame(dGameStr& DinoGame, jumpStr& Dino, aeroStr& Aero, obstStr& obst1, obstStr& obst2, const GameConstStr& GameConst);
+}
 
 
   extern const GameInfo GameInfo_Dino;

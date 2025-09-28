@@ -1,28 +1,30 @@
 #include "Snoopy.h"
 #include "Snoopy_private.h"
 
+namespace SnoopyGame {
+
 void Game_Snoopy() {
 	snoopyStr Snoopy;
-  eggLineStr allEggLines[4];
+  BallLineStr allBallLines[4];
 
   Snoopy.sesionScore = 0;
   while (true) {
     WelcomeSnoopyScreen();
-    SnoopyInit(Snoopy, allEggLines); 
+    SnoopyInit(Snoopy, allBallLines); 
     WaitforButton();
     Snoopy.prevUpdateTime  = millis();
 
     while (Snoopy.lives!=0) {
       displaySoundInfo(120, 0, soundEnabled);
-      if (ItsTimeToMoveEgg(Snoopy)) {
-        DisplayEggsOnScreen(allEggLines);
-        CheckIfEggDropped(Snoopy, allEggLines);
+      if (ItsTimeToMoveBall(Snoopy)) {
+        DisplayBallsOnScreen(allBallLines);
+        CheckIfBallDropped(Snoopy, allBallLines);
         // update game speed every 10 points
-        if (Snoopy.score > 30) Snoopy.frameUpdateRate = Snoopy.initFrameUpdateRate - (Snoopy.score/10)*10;
+        if (Snoopy.score > 30) Snoopy.frameUpdateRate = Snoopy.initFrameUpdateRate - (Snoopy.score/10)*15;
         if (Snoopy.lives == 0) break;
-        if (NewEggIsRequired(Snoopy, allEggLines)) {
+        if (NewBallIsRequired(Snoopy, allBallLines)) {
           for (int i = 0; i < 4; i++) {
-            DrawEggs(allEggLines[i], 1);
+            DrawBalls(allBallLines[i], 1);
           }
         }
       }
@@ -51,12 +53,12 @@ void WelcomeSnoopyScreen() {
 
   myOLED.println("right down shelf > o");
   myOLED.display();
-  delay(DELAY2000MS);
+  delay(DELAY1500MS);
 } 
 
-void AddFirstEgg(eggLineStr allEggLines[4]) {
-  orientation newEggOnLine = (orientation)random(0, 4);
-  allEggLines[newEggOnLine].position |= 1;
+void AddFirstBall(BallLineStr allBallLines[4]) {
+  orientation newBallOnLine = (orientation)random(0, 4);
+  allBallLines[newBallOnLine].position |= 1;
 }
 
 void CheckIfSnopyMoved(snoopyStr& Snoopy) {
@@ -99,53 +101,53 @@ void SnoopyDisplayScore(snoopyStr& Snoopy) {
   myOLED.setTextColor(SH110X_WHITE);
   myOLED.setTextSize(1);
   myOLED.setCursor(0,0);
-  myOLED.print(F("Eggs: "));
+  myOLED.print(F("Balls: "));
   myOLED.print(Snoopy.score);
 }
 
-void DisplayEggsOnScreen(eggLineStr allEggLines[4]) {
-  bool eggsOnScreen = false;
+void DisplayBallsOnScreen(BallLineStr allBallLines[4]) {
+  bool BallsOnScreen = false;
 
   for (int i = 0; i < 4; i++) {
-    DrawEggs(allEggLines[i], 0);
-    allEggLines[i].position = allEggLines[i].position << 1;
-    DrawEggs(allEggLines[i], 1);
+    DrawBalls(allBallLines[i], 0);
+    allBallLines[i].position = allBallLines[i].position << 1;
+    DrawBalls(allBallLines[i], 1);
   }
   for (int i = 0; i < 4; i++) {
-    if (allEggLines[i].position != 0) {
-      eggsOnScreen = true;
+    if (allBallLines[i].position != 0) {
+      BallsOnScreen = true;
       break;
     }
   }
-  if (soundEnabled && eggsOnScreen) {
-    MyTune(TON_EGG_FREQ, TON_EGG_CZAS);
-  } else delay(TON_EGG_CZAS);
+  if (soundEnabled && BallsOnScreen) {
+    MyTune(TON_Ball_FREQ, TON_Ball_CZAS);
+  } else delay(TON_Ball_CZAS);
 }
 
-void DrawEggs( eggLineStr& eggLine, uint16_t color){
+void DrawBalls( BallLineStr& BallLine, uint16_t color){
   for (int i=0; i<7; i++) {
-    if ((eggLine.position & (1 << i)) != 0) {
+    if ((BallLine.position & (1 << i)) != 0) {
       int x=0+i*5; 
       int y=17+i;
-      switch(eggLine.direction) {
+      switch(BallLine.direction) {
         case sLeftUp:
-          myOLED.drawCircle(x, y, EGG_DIMENSION, color);
+          myOLED.drawCircle(x, y, Ball_DIMENSION, color);
         break;
         case sLeftDown:
-          myOLED.drawCircle(x, y+20, EGG_DIMENSION, color);
+          myOLED.drawCircle(x, y+20, Ball_DIMENSION, color);
         break;
         case sRightUp:
-          myOLED.drawCircle(127-x, y, EGG_DIMENSION, color);
+          myOLED.drawCircle(127-x, y, Ball_DIMENSION, color);
         break;
         case sRightDown:
-          myOLED.drawCircle(127-x, y+20, EGG_DIMENSION, color);
+          myOLED.drawCircle(127-x, y+20, Ball_DIMENSION, color);
         break;
       }
     }
   }
 }
 
-bool ItsTimeToMoveEgg(snoopyStr& Snoopy) {
+bool ItsTimeToMoveBall(snoopyStr& Snoopy) {
   if (millis()- Snoopy.prevUpdateTime > (Snoopy.frameUpdateRate)) {
     Snoopy.prevUpdateTime  = millis();
     return true;
@@ -153,7 +155,7 @@ bool ItsTimeToMoveEgg(snoopyStr& Snoopy) {
   return false;
 }
 
-void SnoopyInit(snoopyStr& Snoopy, eggLineStr allEggLines[4]) {
+void SnoopyInit(snoopyStr& Snoopy, BallLineStr allBallLines[4]) {
   myOLED.clearDisplay();
   //draw lives circles
   myOLED.drawCircle(2, 58, 2, SH110X_WHITE);
@@ -176,42 +178,42 @@ void SnoopyInit(snoopyStr& Snoopy, eggLineStr allEggLines[4]) {
   SnoopyDisplayScore(Snoopy);
   DrawSnoopy(Snoopy.direction, SH110X_WHITE);
 
-  ClearEggLines(allEggLines);
-  AddFirstEgg(allEggLines);
+  ClearBallLines(allBallLines);
+  AddFirstBall(allBallLines);
   myOLED.display();
 }
 
-void ClearEggLines(eggLineStr allEggLines[4]) {
+void ClearBallLines(BallLineStr allBallLines[4]) {
   for (int i = 0; i < 4; i++) {
-    DrawEggs(allEggLines[i], 0);
-    allEggLines[i].position = 0;
-    allEggLines[i].direction = (orientation)i;
+    DrawBalls(allBallLines[i], 0);
+    allBallLines[i].position = 0;
+    allBallLines[i].direction = (orientation)i;
   }
 }
 
-void CheckIfEggDropped(snoopyStr& Snoopy, eggLineStr allEggLines[4]) {
+void CheckIfBallDropped(snoopyStr& Snoopy, BallLineStr allBallLines[4]) {
   for (int i = 0; i < 4; i++) {
-    if ((allEggLines[i].position & 128) == 128) {
-      if (Snoopy.direction == allEggLines[i].direction) {
+    if ((allBallLines[i].position & 128) == 128) {
+      if (Snoopy.direction == allBallLines[i].direction) {
         Snoopy.score++;
         if(soundEnabled) {
           MyTune(TON_POINT_FREQ, TON_POINT_CZAS);
         } else delay(TON_POINT_CZAS);
       } else {
         Snoopy.lives --;
-        DisplayBrokenEgg(Snoopy, allEggLines[i].direction);
+        DisplayBrokenBall(Snoopy, allBallLines[i].direction);
 
         if (Snoopy.lives == 0) {
           DisplayGameOverSnoopy(Snoopy);
           WaitforButton();
         }
-        ClearEggLines(allEggLines);
+        ClearBallLines(allBallLines);
       }
     }
   }
 }
 
-void DisplayBrokenEgg(snoopyStr& Snoopy, orientation pos) {
+void DisplayBrokenBall(snoopyStr& Snoopy, orientation pos) {
   int x;
   int y = 44; 
   int z = 36;
@@ -220,52 +222,52 @@ void DisplayBrokenEgg(snoopyStr& Snoopy, orientation pos) {
     x = 75;
   } else x = 30;
   if (pos == sLeftUp || pos == sRightUp) {
-    myOLED.drawCircle(x + 5, z, EGG_DIMENSION, SH110X_WHITE);
+    myOLED.drawCircle(x + 5, z, Ball_DIMENSION, SH110X_WHITE);
     myOLED.display();
     delay(DELAY250MS);
   }
-  myOLED.drawCircle(x + 5, z, EGG_DIMENSION, SH110X_BLACK);
+  myOLED.drawCircle(x + 5, z, Ball_DIMENSION, SH110X_BLACK);
   DrawSnoopy(Snoopy.direction, SH110X_BLACK);
   Snoopy.direction = sWaiting;
   DrawSnoopy(Snoopy.direction, SH110X_WHITE);
-  myOLED.drawBitmap(x, y, BrokenEgg_bmp, 23, 16, SH110X_WHITE);
+  myOLED.drawBitmap(x, y, BrokenBall_bmp, 23, 16, SH110X_WHITE);
   myOLED.display();
   if(soundEnabled) {
     MyTune(TON_ERROR_FREQ, TON_ERROR_CZAS);
   } else delay(TON_ERROR_CZAS);
   
-  myOLED.drawBitmap(x, y, BrokenEgg_bmp, 23, 16, SH110X_BLACK);
+  myOLED.drawBitmap(x, y, BrokenBall_bmp, 23, 16, SH110X_BLACK);
   myOLED.drawCircle(2 + Snoopy.lives * 8, 58, 2, SH110X_BLACK);
 }
 
-bool NewEggIsRequired(snoopyStr& Snoopy, eggLineStr allEggLines[4]) {
-  uint8_t totalEggsPos = 0;
-  uint8_t eggsOnLinesCount = 0;
-  orientation randomLineForNewEgg;
+bool NewBallIsRequired(snoopyStr& Snoopy, BallLineStr allBallLines[4]) {
+  uint8_t totalBallsPos = 0;
+  uint8_t BallsOnLinesCount = 0;
+  orientation randomLineForNewBall;
 
   for (int i = 0; i < 4; i++) {
-    eggsOnLinesCount += __builtin_popcount(allEggLines[i].position);
-    totalEggsPos |= allEggLines[i].position;
+    BallsOnLinesCount += __builtin_popcount(allBallLines[i].position);
+    totalBallsPos |= allBallLines[i].position;
   }
 
-  if (Snoopy.score < 5 || totalEggsPos == 128 || eggsOnLinesCount == 0) {
-    if ((totalEggsPos == 128 && eggsOnLinesCount == 1) || (eggsOnLinesCount == 0)) {
-      AddFirstEgg(allEggLines);
+  if (Snoopy.score < 5 || totalBallsPos == 128 || BallsOnLinesCount == 0) {
+    if ((totalBallsPos == 128 && BallsOnLinesCount == 1) || (BallsOnLinesCount == 0)) {
+      AddFirstBall(allBallLines);
       return true;
     }
     return false;
 
-  } else if (Snoopy.score < 20 || eggsOnLinesCount == 1) {
-    if ((totalEggsPos & 0b00000111) != 0 || (eggsOnLinesCount == 2)) return false;
-    AddFirstEgg(allEggLines);
+  } else if (Snoopy.score < 20 || BallsOnLinesCount == 1) {
+    if ((totalBallsPos & 0b00000111) != 0 || (BallsOnLinesCount == 2)) return false;
+    AddFirstBall(allBallLines);
     return true;
 
-  } else if ((Snoopy.score >= 20) && (eggsOnLinesCount == 2)) {
-    if ((totalEggsPos & 0b00000111) != 0) return false;
+  } else if ((Snoopy.score >= 20) && (BallsOnLinesCount == 2)) {
+    if ((totalBallsPos & 0b00000111) != 0) return false;
     while (1) {
-      randomLineForNewEgg = (orientation)random(0, 4);
-      if ((allEggLines[randomLineForNewEgg].position & 0b00000111) == 0) {
-        allEggLines[randomLineForNewEgg].position |= 1;
+      randomLineForNewBall = (orientation)random(0, 4);
+      if ((allBallLines[randomLineForNewBall].position & 0b00000111) == 0) {
+        allBallLines[randomLineForNewBall].position |= 1;
         return true;
       }
     }
@@ -318,9 +320,11 @@ void DisplayGameOverSnoopy(snoopyStr& Snoopy) {
   myOLED.display();
 }
 
+} // namespace SnoopyGame
+
 const GameInfo GameInfo_Snoopy = {
   "Snoopy",
   "klasyczne lapanie jajek",
-  Game_Snoopy,
+  SnoopyGame::Game_Snoopy,
   Game_SnoopyRecord
 };
