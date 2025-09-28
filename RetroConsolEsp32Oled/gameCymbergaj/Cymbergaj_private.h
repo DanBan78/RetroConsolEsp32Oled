@@ -46,7 +46,7 @@
       int padleDeltaMoveY;
       int padleHalfWidth;
       level difficulty;
-      speed ballSpeed;
+      speed BallSpeed;
     };
 
     typedef struct  cymMenuStruct {
@@ -70,6 +70,7 @@
  
 
 
+namespace CymbergajGame {
   bool ItsGameOver(cymGameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   bool ItsTimeForBallPosUpdate(cymBallStruct& Ball);
   bool ItsTimeForPadlePosUpdate(cymGameStruct& Game);
@@ -96,4 +97,6 @@
   void ShowUserMenu(cymMenuStruct& Menu, cymGameStruct& Game);
   void UpdateBallPosAndCheckBandOrGoal(cymGameStruct& CymGame, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   void DisplayMenuStrings(cymMenuStruct& Menu, int SelectedRow);
+}
+
 #endif

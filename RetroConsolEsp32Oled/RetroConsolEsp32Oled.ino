@@ -5,14 +5,11 @@
 
 // Tablica wskaźników do struktur z informacjami o grach
 const GameInfo* allGames[] = {
-    &GameInfo_Snoopy,
     &GameInfo_Dino,
+    &GameInfo_Snoopy,
+    &GameInfo_Slalom,  
     &GameInfo_HackMe,
     &GameInfo_Cymbergaj,
-    &GameInfo_Slalom,
-    &GameInfo_Wilk,
-    
-    //&GameInfo_SpaceShooter,
     &HelpInfo,
 
     // Dodaj kolejne gry: &GameInfo_SpaceShooter, &GameInfo_Slalom, ...
@@ -44,6 +41,12 @@ void setup() {
   delay(500);
   CheckIfResetHighscores();
   delay(100);
+
+  esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
+  if (wakeup_reason == ESP_SLEEP_WAKEUP_GPIO) {
+    wakeFromSleep();
+  }  
+  lastButtonPress = millis();
   //DisplayHighscores();
 }
 //####################################################################################
