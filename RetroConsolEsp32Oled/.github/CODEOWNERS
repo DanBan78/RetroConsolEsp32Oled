@@ -1,0 +1,7 @@
+# Global code owners - require review from these users
+* @DanBan78
+
+# Specific paths can have different owners
+game*/ @DanBan78
+global/ @DanBan78
+*.ino @DanBan78

@@ -8,28 +8,13 @@
 
 Adafruit_SH1106G myOLED = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-bool soundEnabled = false;
-bool Debug = true;
-bool sounddone = false;
-bool pauseGame = false;
-int GameSpeed = 0;
+bool SoundEnabled = false;
 int GameSelected = 1;
-int score = 0;
-int SessionScore = 0;
-unsigned long lastButtonPress = 0;
+int Score = 0;
+unsigned long lastButtonPressTime = 0;
 bool sleepModeActive = false;
 
 timerStruct Timer1Sec = {false, DELAY1000MS, 0, 0};
-
-void displayVar(int i) {
-	//myOLED.clearDisplay();
-  myOLED.setTextColor(SH110X_WHITE);
-  myOLED.fillRect(100, 10, 26, 26, SH110X_BLACK);
-  myOLED.setTextSize(1);
-  myOLED.setCursor(100,11);
-  myOLED.print(i);
-  //myOLED.display();
-}
 
 btPressedCode ReadButton(void (*callback)(timerStruct&), timerStruct& t) {
   btPressedCode ButtonCode = NONE;
@@ -46,7 +31,6 @@ btPressedCode ReadButton(void (*callback)(timerStruct&), timerStruct& t) {
   delay(10); // debounce
   if (checkForSleep()) {
     enterSleepMode();
-    // Deep sleep powoduje restart - ta linia nigdy się nie wykona
   }
   return ButtonCode;
 }
@@ -74,23 +58,22 @@ bool IsPressed(btPressedCode button) {
       if (digitalRead(BTN_4) == LOW) pressed = true;
       break;
   }
-  if (pressed) lastButtonPress = millis();
+  if (pressed) lastButtonPressTime = millis();
   return pressed;
 }
 
-void WaitforButton() {
-  btPressedCode btn = ReadButton(nullptr, Timer1Sec);
-  while (btn == NONE) {
+void WaitForAnyButtonToContinue() {
+  while (ReadButton(nullptr, Timer1Sec) == NONE) {
     if (checkForSleep()) {
       enterSleepMode();
     }
-    btn = ReadButton(nullptr, Timer1Sec);
-  } // wait for button press
-  btn = ReadButton(nullptr, Timer1Sec);
-  while (btn != NONE) {
-    btn = ReadButton(nullptr, Timer1Sec);
-  } 
+  }
+  WaitForButtonRelease();
 }
+
+void WaitForButtonRelease() {
+  while (ReadButton(nullptr, Timer1Sec) != NONE);
+} 
 
 void WelcomeScreen() {
   myOLED.setTextColor(SH110X_WHITE);
@@ -106,24 +89,16 @@ void WelcomeScreen() {
 int GameSelectMenu() {
 
   int GameSelected = 0;
-  displayMenu(GameSelected, totalGamesNo);
+  DisplayMenu(GameSelected, totalGamesNo);
   btPressedCode btn = NONE;
   unsigned long lastDisplayUpdate = millis();
 
   while(btn != DownRight) {
     btn = ReadButton(nullptr, Timer1Sec);
     
-    // Sprawdzenie czy czas na sleep mode
     if (checkForSleep()) {
       enterSleepMode();
-      // Deep sleep powoduje restart - ta linia nigdy się nie wykona
     }
-    
-    // // Odświeżanie wyświetlacza co 500ms dla aktualizacji timera sleep
-    // if (millis() - lastDisplayUpdate > 500) {
-    //   displayMenu(GameSelected, totalGamesNo);
-    //   lastDisplayUpdate = millis();
-    // }
     
     if (btn != NONE) {
       if (btn == DownLeft && GameSelected < (totalGamesNo - 1)) {
@@ -133,10 +108,10 @@ int GameSelectMenu() {
         GameSelected--;
       }
       if (btn == UpRight) {
-        soundEnabled = !soundEnabled;
+        SoundEnabled = !SoundEnabled;
       }
-      while (ReadButton(nullptr, Timer1Sec) != NONE); // wait for button release
-      displayMenu(GameSelected, totalGamesNo);
+      WaitForButtonRelease();
+      DisplayMenu(GameSelected, totalGamesNo);
       // lastDisplayUpdate = millis();
     }
     delay(50);
@@ -145,9 +120,7 @@ int GameSelectMenu() {
 }
 
 
-void displayMenu(int MenuStartRow, int totalGamesNo){ 
-  //Serial.println("displayMenu");
-
+void DisplayMenu(int MenuStartRow, int totalGamesNo){ 
   if (MenuStartRow > totalGamesNo) return;
 
   myOLED.clearDisplay();
@@ -157,15 +130,15 @@ void displayMenu(int MenuStartRow, int totalGamesNo){
   if (totalGamesNo==0) return;
   if (MenuStartRow < 0) MenuStartRow = 0;
   if (MenuStartRow > totalGamesNo) MenuStartRow = totalGamesNo;
-  myOLED.setCursor(1,0);
-  myOLED.print(">");
+    myOLED.setCursor(1,0);
+    myOLED.print(">");
 
   for (int i=MenuStartRow; i<MenuStartRow+maxMenuRowsOnScreen && i< totalGamesNo; i++){
     myOLED.setCursor(10,(i-MenuStartRow)*12);
     myOLED.print(String(i+1)+". ");
     myOLED.print(allGames[i]->name);
   }
-  displaySoundInfo(120, 0, soundEnabled);
+  DisplaySoundInfo(120, 0, SoundEnabled);
   myOLED.display();
 }
 
@@ -182,7 +155,7 @@ void MyTune(int freq, int duration_ms) {
   delay(duration_ms);
   noTone(BUZZER_PIN);
 }
-void displaySoundInfo(uint8_t x, uint8_t y, bool sound){
+void DisplaySoundInfo(uint8_t x, uint8_t y, bool sound){
   myOLED.setTextSize(1);
   if (sound) {
   myOLED.drawBitmap(x, y, Glosnik, Glosnik_x_y, Glosnik_x_y, SH110X_WHITE);
@@ -190,16 +163,7 @@ void displaySoundInfo(uint8_t x, uint8_t y, bool sound){
     myOLED.fillRect(x, y, Glosnik_x_y, Glosnik_x_y, SH110X_BLACK);
   }
 }
-void displaySoundInfo2(bool sound){
-  myOLED.setTextSize(1);
-  //myOLED.setCursor(116,1);
-  if (sound) {
-  myOLED.drawBitmap(120, 14, Glosnik, Glosnik_x_y, Glosnik_x_y, SH110X_WHITE);
-  //myOLED.print("!!");
-  } else {
-    myOLED.fillRect(120, 14, Glosnik_x_y, Glosnik_x_y, SH110X_BLACK);
-  }
-}
+
 void CheckIfResetHighscores(){
   if (IsPressed(UpLeft) && IsPressed(UpRight) && IsPressed(DownLeft)) {
     int reset = 0;
@@ -258,7 +222,7 @@ void DisplayHelpInfo() {
     myOLED.print(buffer);
   }
   myOLED.display();
-  WaitforButton();
+  WaitForAnyButtonToContinue();
   myOLED.clearDisplay();
   for (int i=4; i<9; i++) {
     char buffer[120];
@@ -270,7 +234,7 @@ void DisplayHelpInfo() {
     myOLED.print(buffer);
   }
   myOLED.display();
-  WaitforButton();
+  WaitForAnyButtonToContinue();
   myOLED.clearDisplay();
   for (int i=9; i<12; i++) {
     char buffer[120];
@@ -282,7 +246,7 @@ void DisplayHelpInfo() {
     myOLED.print(buffer);
   }
   myOLED.display();
-  WaitforButton();
+  WaitForAnyButtonToContinue();
   myOLED.clearDisplay();
   for (int i=12; i<17; i++) {
     char buffer[120];
@@ -292,7 +256,7 @@ void DisplayHelpInfo() {
     myOLED.print(buffer);
   }
   myOLED.display();
-  WaitforButton();
+  WaitForAnyButtonToContinue();
   myOLED.clearDisplay();
   for (int i=17; i<21; i++) {
     char buffer[120];
@@ -303,7 +267,7 @@ void DisplayHelpInfo() {
   }
   myOLED.display();
   delay(1000);
-  WaitforButton();
+  WaitForAnyButtonToContinue();
  }
 
 void SerialPrintFreeRam() {
@@ -355,11 +319,9 @@ void wakeFromSleep() {
   delay(2000); // Pokaż komunikat przez 2 sekundy
   
   // Reset wszystkich zmiennych stanu
-  lastButtonPress = millis();
+  lastButtonPressTime = millis();
   sleepModeActive = false;
-  pauseGame = false;
-  score = 0;
-  SessionScore = 0;
+  Score = 0;
   
   // Poczekaj aż wszystkie przyciski zostaną puszczone
   while (digitalRead(BTN_0) == LOW || digitalRead(BTN_1) == LOW || 
@@ -372,7 +334,7 @@ void wakeFromSleep() {
 }
 
 bool checkForSleep() {
-  if (millis() - lastButtonPress > SLEEP_TIMEOUT_MS) {
+  if (millis() - lastButtonPressTime > SLEEP_TIMEOUT_MS) {
     return true;
   }
   return false;

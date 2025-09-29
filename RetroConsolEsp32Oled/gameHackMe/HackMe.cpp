@@ -4,32 +4,33 @@
 namespace HackMeGame {
 
 void Game_HackMe() {
-  HackMeStruct HackMeGame;
+  gameStruct HackMeGame;
   btPressedCode ButtonCode;
 
-  WelcomeHackMeScreen();
-  WaitforButton();
-  initGameParameters(HackMeGame, Timer1Sec);
+  WelcomeScreen();
+  delay(DELAY1000MS);
+  GameParams(HackMeGame, Timer1Sec);
   HackMeGame.newGame = true;
 
   while(true) {
-    if (Timer1Sec.timeOut) timeEndedGameOver(HackMeGame, Timer1Sec);
+    if (Timer1Sec.timeOut) DisplayExplosionAndResolution(HackMeGame, Timer1Sec);
     if (HackMeGame.newGame) {
       myOLED.clearDisplay();  
-      GenerateRandomCodeMatrix(HackMeGame);
-
+      GenerateAndDisplayCodeMatrix(HackMeGame);
       DisplayMixedCodeAndStartCountingDown(HackMeGame, Timer1Sec);
-      initGameParameters(HackMeGame, Timer1Sec);
-    } else GameRestart(HackMeGame);
-    while(true) {
-      hdisplaySoundInfo();
-      if (FirstDigitIsWrong(HackMeGame,Timer1Sec)) break;
-      if (SecondDigitIsWrong(HackMeGame,Timer1Sec)) break;
-      if (ThirdDigitIsWrong(HackMeGame,Timer1Sec)) break;
-      if (FourthDigitIsWrong(HackMeGame,Timer1Sec)) break;
-      CodeResolved();   
-      HackMeGame.newGame = true;
-      break;
+      GameParams(HackMeGame, Timer1Sec);
+    } else {
+      GameRestart(HackMeGame);
+      while(true) {
+        DisplaySoundInfo(88, 52, SoundEnabled);
+        if (FirstDigitIsWrong(HackMeGame,Timer1Sec)) break;
+        if (SecondDigitIsWrong(HackMeGame,Timer1Sec)) break;
+        if (ThirdDigitIsWrong(HackMeGame,Timer1Sec)) break;
+        if (FourthDigitIsWrong(HackMeGame,Timer1Sec)) break;
+        CodeResolved();   
+        HackMeGame.newGame = true;
+        break;
+      }
     }
   }
 }
@@ -42,9 +43,9 @@ void CodeResolved() {
     myOLED.setCursor(25, 35);
     myOLED.println(F("zlamany!"));
     myOLED.display();
-    if (soundEnabled) {
-      tone(BUZZER_PIN, 1000, 300);
-      delay(DELAY500MS);
+    if (SoundEnabled) {
+      tone(BUZZER_PIN, TON_PUNKT_CZAS, DELAY250MS);
+      delay(DELAY250MS);
       noTone(BUZZER_PIN);
     } else delay(DELAY500MS);
     myOLED.fillRect(10, 10, 74, 44, SH110X_BLACK);
@@ -55,25 +56,25 @@ void CodeResolved() {
   myOLED.display();
 }
 
-void GameRestart(HackMeStruct& HackMeGame) {
+void GameRestart(gameStruct& HackMeGame) {
   myOLED.clearDisplay();
-  displayMatrix(HackMeGame);
-  selectFirstRowCol(HackMeGame);
-  mixedCodeDisplay(HackMeGame);
+  DisplayCodeMatrix(HackMeGame);
+  SelectFirstRowCol(HackMeGame);
+  MixedCodeDisplay(HackMeGame);
   for (int i=0; i<CodeWidth; i++) (HackMeGame.CodeSignsCodesMixed[i].matched = false);
   myOLED.display();
 }
 
-void timeEndedGameOver(HackMeStruct& HackMeGame, timerStruct& Timer1Sec){
+void DisplayExplosionAndResolution(gameStruct& HackMeGame, timerStruct& Timer1Sec){
   Timer1Sec.timeOut = false;
   Timer1Sec.currTime = timeForCodeBreaking;
-  displayBombExplosion();
-  displayResolution(HackMeGame);
+  DisplayExplosion();
+  DisplayResolution(HackMeGame);
   myOLED.clearDisplay();
   myOLED.display();
 }
 
-void initGameParameters(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
+void GameParams(gameStruct& HackMeGame, timerStruct& Timer1Sec) {
   HackMeGame.newGame = false;
   HackMeGame.SelectedRow = 0;
   HackMeGame.SelectedCol = 0;
@@ -84,18 +85,20 @@ void initGameParameters(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
   Timer1Sec.timeOut = false;
 }
 
-void DisplayMixedCodeAndStartCountingDown(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
-    selectFirstRowCol(HackMeGame);
-    GenerateCode(HackMeGame, CodeWidth); // wygenerowana tablica czas wygenerowac code
-    mixCode(HackMeGame, CodeWidth);
-    mixedCodeDisplay(HackMeGame);
-    delay(100);
+void DisplayMixedCodeAndStartCountingDown(gameStruct& HackMeGame, timerStruct& Timer1Sec) {
+    SelectFirstRowCol(HackMeGame);
+    GenerateCode(HackMeGame, CodeWidth);
+    MixCode(HackMeGame, CodeWidth);
+    MixedCodeDisplay(HackMeGame);
+    delay(DELAY100MS);
     while (ReadButton(nullptr, Timer1Sec) == DownRight);
+    myOLED.display();
+
     Timer1Sec.currTime = timeForCodeBreaking;
     Timer1Sec.timeOut = false;
 }
 
-void randomMatrix(HackMeStruct& HackMeGame) {
+void GenerateRandomCodeMatrix(gameStruct& HackMeGame) {
   for (uint8_t row=0; row< ArrayMaxRowColIndex+1; row++) {
     for (uint8_t col=0; col< ArrayMaxRowColIndex+1; col++) {
       HackMeGame.GameMatrix[row][col]= random(0,12);
@@ -103,25 +106,25 @@ void randomMatrix(HackMeStruct& HackMeGame) {
   }
 }
 
-void displayMatrix(HackMeStruct& HackMeGame) {
+void DisplayCodeMatrix(gameStruct& HackMeGame) {
   myOLED.fillRect(0,0, 80, 64, SH110X_BLACK);
   myOLED.setTextColor(SH110X_WHITE);
   myOLED.setCursor(0, 56);
   myOLED.setTextSize(1);
   for (uint8_t row=0; row< ArrayMaxRowColIndex+1; row++) {
     for (uint8_t col=0; col< ArrayMaxRowColIndex+1; col++) {
-  myOLED.setCursor(4+14*col, 11*row); // x: kolumna, y: wiersz (lepsze wyśrodkowanie)
+      myOLED.setCursor(4+14*col, 11*row);
       myOLED.print(CodeChars[HackMeGame.GameMatrix[row][col]]);
     }
   }
 }
 
-void displayBombExplosion() {
+void DisplayExplosion() {
   myOLED.clearDisplay();
   myOLED.setTextSize(1);
   myOLED.drawBitmap(32, -1, WYBUCH, 64, 64, SH110X_WHITE);
   for (uint8_t i=0; i < 3; i++){
-    if (soundEnabled) tone(BUZZER_PIN, 600, DELAY100MS);
+    if (SoundEnabled) tone(BUZZER_PIN, 600, DELAY100MS);
     myOLED.fillRect(0, 0, 127, 63, SH110X_INVERSE);
     myOLED.display();
     delay(DELAY100MS);
@@ -130,22 +133,22 @@ void displayBombExplosion() {
     myOLED.display();
     delay(DELAY100MS);
   }
-  if (soundEnabled) tone(BUZZER_PIN, 300, DELAY500MS);
+  if (SoundEnabled) tone(BUZZER_PIN, 300, DELAY500MS);
   delay(DELAY500MS);
   noTone(BUZZER_PIN);
 }
 
-void SelectRow_y(HackMeStruct& HackMeGame, uint8_t row) {
-  myOLED.fillRect(1, 11*HackMeGame.SelectedRow-1, 79, 9, SH110X_INVERSE);
-  myOLED.fillRect(1, 11*row-1, 79, 9, SH110X_INVERSE);
+void SelectRow_y(uint8_t SelectRow, uint8_t UnselectRow) {
+  myOLED.fillRect(1, 11*SelectRow-1, 79, 9, SH110X_INVERSE);
+  myOLED.fillRect(1, 11*UnselectRow-1, 79, 9, SH110X_INVERSE);
 }
 
-void SelectCol_x(HackMeStruct& HackMeGame, uint8_t col) {
-  myOLED.fillRect(1+(HackMeGame.SelectedCol)*14, 0, 9, 63, SH110X_INVERSE);
-  myOLED.fillRect(1+14*col, 0, 9, 63, SH110X_INVERSE);
+void SelectCol_x(uint8_t SelectCol, uint8_t UnselectCol) {
+  myOLED.fillRect(1+(SelectCol)*14, 0, 9, 63, SH110X_INVERSE);
+  myOLED.fillRect(1+14*UnselectCol, 0, 9, 63, SH110X_INVERSE);
 }
 
-void GenerateCode(HackMeStruct& HackMeGame, uint8_t ileZnakow) {
+void GenerateCode(gameStruct& HackMeGame, uint8_t ileZnakow) {
   uint8_t indeks = 0;
   for (uint8_t znakIndex=0; znakIndex < ileZnakow; znakIndex++) {
     bool done = false;
@@ -184,7 +187,7 @@ void GenerateCode(HackMeStruct& HackMeGame, uint8_t ileZnakow) {
   }
 }
 
-void mixCode(HackMeStruct& HackMeGame,uint8_t ileZnakow) {
+void MixCode(gameStruct& HackMeGame,uint8_t ileZnakow) {
   int digits[4] = {1, 2, 3, 4};
   // Tasowanie tablicy (algorytm Fishera-Yatesa)
   for (int i = 3; i > 0; i--) {
@@ -196,38 +199,31 @@ void mixCode(HackMeStruct& HackMeGame,uint8_t ileZnakow) {
 
   for(int i=0; i<CodeWidth; i++) {
     int k = digits[i]-1;
-    HackMeGame.CodeSignsCodesMixed[i].CodeSignsCodesIndex = HackMeGame.CodeSignsCodes[k]; // tablica przechowujaca indeksy znakow kodu w losowej kolejnosci
+    HackMeGame.CodeSignsCodesMixed[i].CodeSignsCodesIndex = HackMeGame.CodeSignsCodes[k];
     HackMeGame.CodeSignsCodesMixed[i].matched = false;
   }
 }
 
-void mixedCodeDisplay (HackMeStruct& HackMeGame){
+void MixedCodeDisplay (gameStruct& HackMeGame){
   myOLED.fillRect(88, 0, 40, 40, SH110X_BLACK);
   for (int i=0; i<CodeWidth; i++) {
     myOLED.setTextSize(1);
     myOLED.setCursor(93,11*i);
     int k = HackMeGame.CodeSignsCodesMixed[i].CodeSignsCodesIndex;
     myOLED.print(CodeChars[k]);
-    myOLED.display();
   }
 }
 
-// Funkcja wyboru pierwszej cyfry kodu: użytkownik wybiera kolumnę w pierwszym wierszu
-bool FirstDigitIsWrong(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
-  int prevCol = HackMeGame.SelectedCol; // zawsze ta sama kolumna
-  int prevRow = HackMeGame.SelectedRow;
-  while(ReadButton(Timer_Interrupt, Timer1Sec) != NONE);
+bool FirstDigitIsWrong(gameStruct& HackMeGame, timerStruct& Timer1Sec) {
+  int prevCol = HackMeGame.SelectedCol;
+  btPressedCode button = NONE;
 
   while(!Timer1Sec.timeOut) {
-    int selectedCol = HackMeGame.SelectedCol;
-    btPressedCode button;
-    while (ReadButton(Timer_Interrupt, Timer1Sec) == NONE) {
-      ReadButton(Timer_Interrupt, Timer1Sec);
-      if (checkForTimeoutAndDisplayCurrTime(Timer1Sec)) return true;
-    }
     button = ReadButton(Timer_Interrupt, Timer1Sec);
-    while (ReadButton(Timer_Interrupt, Timer1Sec) != NONE); // czekaj na puszczenie przycisku
-
+    while (button == NONE) {
+      button = ReadButton(Timer_Interrupt, Timer1Sec);
+      if (TimeOutBombExplode(Timer1Sec)) return true;
+    }
     switch (button) {
       case UpLeft:
         if (HackMeGame.SelectedCol == 0) break;
@@ -238,34 +234,34 @@ bool FirstDigitIsWrong(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
         HackMeGame.SelectedCol++;
         break;
       case DownRight:
-        if (DigitIsWrong(HackMeGame)) {
+        if (SelectedDigitIsWrong(HackMeGame)) {
           return true;
         } else return false;
         break;
       default:
         break;
     }
-    if (selectedCol != HackMeGame.SelectedCol) {
-      SelectCol_x(HackMeGame, selectedCol);
+    if (prevCol != HackMeGame.SelectedCol) {
+      SelectCol_x(HackMeGame.SelectedCol, prevCol);
+      prevCol = HackMeGame.SelectedCol;
+      myOLED.display();
     }
-    myOLED.display();
-    while (ReadButton(Timer_Interrupt, Timer1Sec) != NONE);
+    WaitForButtonRelease();
   }
   return true;
 }
 
-// Funkcja sprawdzająca drugi znak: user wybiera wiersz, kolumna ustalona
-bool SecondDigitIsWrong(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
-  int prevCol = HackMeGame.SelectedCol; // zawsze ta sama kolumna
+bool SecondDigitIsWrong(gameStruct& HackMeGame, timerStruct& Timer1Sec) {
   int prevRow = HackMeGame.SelectedRow;
+  int selectedRow = HackMeGame.SelectedRow;
+  btPressedCode button = NONE;
+
   while(!Timer1Sec.timeOut) {
-    int selectedRow = HackMeGame.SelectedRow;
-    btPressedCode button;
-    while (ReadButton(Timer_Interrupt, Timer1Sec) == NONE) {
-      ReadButton(Timer_Interrupt, Timer1Sec);
-      if (checkForTimeoutAndDisplayCurrTime(Timer1Sec)) return true;
+    button = ReadButton(Timer_Interrupt, Timer1Sec);
+    while (button == NONE) {
+      button = ReadButton(Timer_Interrupt, Timer1Sec);
+      if (TimeOutBombExplode(Timer1Sec)) return true;
     }
-    button = ReadButton(Timer_Interrupt, Timer1Sec);;
     switch (button){
       case DownLeft:
         if (HackMeGame.SelectedRow == ArrayMaxRowColIndex) break;
@@ -277,7 +273,7 @@ bool SecondDigitIsWrong(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
         break;
       case DownRight:
         if (HackMeGame.SelectedRow == prevRow)  continue; // ignoruj próbę wyboru tej samej pozycji
-        if (DigitIsWrong(HackMeGame)) {
+        if (SelectedDigitIsWrong(HackMeGame)) {
           return true;
         } else return false;
         break;
@@ -285,26 +281,27 @@ bool SecondDigitIsWrong(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
         break;
     }
     if (selectedRow != HackMeGame.SelectedRow) {
-      SelectRow_y(HackMeGame, selectedRow);
+      SelectRow_y(HackMeGame.SelectedRow, prevRow);
+      selectedRow = HackMeGame.SelectedRow;
+      myOLED.display();
     }
-    myOLED.display();
-    while(ReadButton(Timer_Interrupt, Timer1Sec) != NONE);
+    WaitForButtonRelease();
   }
   return true;
 }
 
- // Funkcja wyboru trzeciego znaku: user wybiera kolumnę, nie może wybrać tej samej co poprzednio
-bool ThirdDigitIsWrong(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
-  int prevCol = HackMeGame.SelectedCol; // zawsze ta sama kolumna
-  int prevRow = HackMeGame.SelectedRow;
+bool ThirdDigitIsWrong(gameStruct& HackMeGame, timerStruct& Timer1Sec) {
+  int prevCol = HackMeGame.SelectedCol;
+  int selectedCol = HackMeGame.SelectedCol;
+  btPressedCode button = NONE;
+
   while(!Timer1Sec.timeOut) {
-    int selectedCol = HackMeGame.SelectedCol;
-    btPressedCode button;
-    while (ReadButton(Timer_Interrupt, Timer1Sec) == NONE) {
-      ReadButton(Timer_Interrupt, Timer1Sec);
-      if (checkForTimeoutAndDisplayCurrTime(Timer1Sec)) return true;
-    }
+    selectedCol = HackMeGame.SelectedCol;
     button = ReadButton(Timer_Interrupt, Timer1Sec);
+    while (button == NONE) {
+      button = ReadButton(Timer_Interrupt, Timer1Sec);
+      if (TimeOutBombExplode(Timer1Sec)) return true;
+    }
     switch (button){
       case UpLeft:
         if (HackMeGame.SelectedCol == 0) break;
@@ -316,33 +313,35 @@ bool ThirdDigitIsWrong(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
         break;
       case DownRight:
         if (HackMeGame.SelectedCol == prevCol) continue; // ignoruj próbę wyboru tej samej pozycji
-        if (DigitIsWrong(HackMeGame)) {
+        if (SelectedDigitIsWrong(HackMeGame)) {
           return true;
         } else return false;
         break;
       default:
         break;
     }
-    if (selectedCol != HackMeGame.SelectedCol) SelectCol_x(HackMeGame, selectedCol);
-    myOLED.display();
-    while(ReadButton(Timer_Interrupt, Timer1Sec) != NONE);
+    if (selectedCol != HackMeGame.SelectedCol) {
+      SelectCol_x(HackMeGame.SelectedCol, prevCol);
+      selectedCol = HackMeGame.SelectedCol;
+      myOLED.display();
+    }
+    WaitForButtonRelease();
   }
   return true;
 }
 
-// Funkcja wyboru czwartego znaku: user wybiera wiersz, nie może wybrać tego samego co poprzednio
-bool FourthDigitIsWrong(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
-  int prevCol = HackMeGame.SelectedCol; // zawsze ta sama kolumna
+bool FourthDigitIsWrong(gameStruct& HackMeGame, timerStruct& Timer1Sec) {
   int prevRow = HackMeGame.SelectedRow;
+  int selectedRow = HackMeGame.SelectedRow;
+  btPressedCode button = NONE;
+  
   while(!Timer1Sec.timeOut) {
-    int selectedRow = HackMeGame.SelectedRow;
-
-    btPressedCode button;
-    while (ReadButton(Timer_Interrupt, Timer1Sec) == NONE) {
-      ReadButton(Timer_Interrupt, Timer1Sec);
-      if (checkForTimeoutAndDisplayCurrTime(Timer1Sec)) return true;
-    }
+    selectedRow = HackMeGame.SelectedRow;
     button = ReadButton(Timer_Interrupt, Timer1Sec);
+    while (button == NONE) {
+      button = ReadButton(Timer_Interrupt, Timer1Sec);
+      if (TimeOutBombExplode(Timer1Sec)) return true;
+    }
     switch (button){
       case UpLeft:
         if (HackMeGame.SelectedRow == 0) break;
@@ -354,7 +353,7 @@ bool FourthDigitIsWrong(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
         break;
       case DownRight:
         if (HackMeGame.SelectedRow == prevRow) continue; // ignoruj próbę wyboru tej samej pozycji
-        if (DigitIsWrong(HackMeGame)) {
+        if (SelectedDigitIsWrong(HackMeGame)) {
           return true;
         } else return false;
         break;
@@ -362,15 +361,16 @@ bool FourthDigitIsWrong(HackMeStruct& HackMeGame, timerStruct& Timer1Sec) {
         break;
     }
     if (selectedRow != HackMeGame.SelectedRow) {
-      SelectRow_y(HackMeGame, selectedRow);
+      SelectRow_y(HackMeGame.SelectedRow, prevRow);
+      selectedRow = HackMeGame.SelectedRow;
+      myOLED.display();
     }
-    myOLED.display();
-    while(ReadButton(Timer_Interrupt, Timer1Sec) != NONE);
+    WaitForButtonRelease();
   }
   return true;
 }
 
-bool DigitIsWrong(HackMeStruct& HackMeGame){
+bool SelectedDigitIsWrong(gameStruct& HackMeGame){
   for (int i=0; i<CodeWidth; i++) {
     if (HackMeGame.CodeSignsCodesMixed[i].matched == false) {// jeśli ten znak jeszcze nie został dopasowany
       if (HackMeGame.CodeSignsCodesMixed[i].CodeSignsCodesIndex == HackMeGame.GameMatrix[HackMeGame.SelectedRow][HackMeGame.SelectedCol]) {
@@ -380,22 +380,22 @@ bool DigitIsWrong(HackMeStruct& HackMeGame){
         myOLED.setCursor(93,11*(i));
         myOLED.fillRect(93,11*(i), 8, 8, SH110X_BLACK);
         myOLED.display();
-        if (soundEnabled) {
+        if (SoundEnabled) {
           tone(BUZZER_PIN, TON_KONIECGRY_CZAS, DELAY100MS);
           delay(DELAY100MS);
           noTone(BUZZER_PIN);
         } else delay(DELAY100MS);
-        return false; // poprawny wybór
+        return false;
       }
     }
   }
-  errorSound();
-  return true; // brak dopasowania
+  ErrorSound();
+  return true;
 }
 
-void displayResolution(HackMeStruct& HackMeGame) {
+void DisplayResolution(gameStruct& HackMeGame) {
   myOLED.clearDisplay();
-  displayMatrix(HackMeGame);
+  DisplayCodeMatrix(HackMeGame);
   for (int i=0; i < 6; i++) {
     myOLED.setCursor(115, 11*i);
     myOLED.print(CodeString[i]);
@@ -435,10 +435,8 @@ void displayResolution(HackMeStruct& HackMeGame) {
     myOLED.display();
     delay(800);
   }
-  myOLED.display();
-  delay(DELAY500MS);
   HackMeGame.newGame = true;
-  while (ReadButton(nullptr, Timer1Sec) == NONE);
+  WaitForButtonRelease();
   myOLED.clearDisplay();
   myOLED.setCursor(10, 25);
   myOLED.println(F("Czas na nowa gre!"));
@@ -446,8 +444,8 @@ void displayResolution(HackMeStruct& HackMeGame) {
   delay(DELAY1000MS);
 }
 
-void errorSound() {
-  if (!soundEnabled) return;
+void ErrorSound() {
+  if (!SoundEnabled) return;
   for (int j=0; j<3; j++) {
     tone(BUZZER_PIN, TON_RAMKA_FREQ, DELAY250MS);
     delay(DELAY50MS);
@@ -456,7 +454,7 @@ void errorSound() {
   }
 }
 
-void WelcomeHackMeScreen() {
+void WelcomeScreen() {
   myOLED.clearDisplay();
   myOLED.setTextColor(SH110X_WHITE);
   myOLED.setTextSize(2);
@@ -477,35 +475,19 @@ void WelcomeHackMeScreen() {
   delay(DELAY1000MS);
 } 
 
-void GenerateRandomCodeMatrix(HackMeStruct& HackMeGame) {
+void GenerateAndDisplayCodeMatrix(gameStruct& HackMeGame) {
   uint8_t randomLoopCount = random(5,20);
-  for (int i=0; i<randomLoopCount; i++) {
+  for (int i=0; i < randomLoopCount; i++) {
     myOLED.clearDisplay();
-    randomMatrix(HackMeGame);
-    displayMatrix(HackMeGame);
-    myOLED.display();
+    GenerateRandomCodeMatrix(HackMeGame);
   }
-  while (ReadButton(nullptr, Timer1Sec) != NONE);
-  while (ReadButton(nullptr, Timer1Sec) == NONE) {
+  while (true) {
     myOLED.clearDisplay();
-    randomMatrix(HackMeGame);
-    displayMatrix(HackMeGame);
+    GenerateRandomCodeMatrix(HackMeGame);
+    DisplayCodeMatrix(HackMeGame);
     myOLED.display();
+    if (ReadButton(nullptr, Timer1Sec) != NONE) return;
   }
-}
-
-void hdisplaySoundInfo() {
-  if (!soundEnabled) {
-    myOLED.setTextColor(SH110X_BLACK);
-    myOLED.setCursor(88, 52);
-    myOLED.print("!");
-  } else {
-    myOLED.setTextColor(SH110X_WHITE);
-    myOLED.setCursor(88, 52);
-    myOLED.print("!");
-  }
-  myOLED.setTextColor(SH110X_WHITE);
-  myOLED.display();
 }
 
 void Timer_Interrupt(timerStruct& t) {
@@ -518,11 +500,19 @@ void Timer_Interrupt(timerStruct& t) {
   }
 }
 
-bool checkForTimeoutAndDisplayCurrTime(timerStruct& Timer1Sec) {
+bool TimeOutBombExplode(timerStruct& Timer1Sec) {
+  DisplayTimeToExplosion(Timer1Sec);
+  if (Timer1Sec.timeOut) {
+    return true;
+  }
+  return false;
+}
+
+void DisplayTimeToExplosion(timerStruct& Timer1Sec) {
   int lineStart = 55;
   int lineEnd = lineStart - Timer1Sec.currTime;
-  myOLED.drawLine(120, lineStart, 120, lineStart-timeForCodeBreaking, SH110X_BLACK);
 
+  myOLED.drawLine(120, lineStart, 120, lineStart-timeForCodeBreaking, SH110X_BLACK);
   myOLED.fillRect(118, lineEnd, 6, 6, SH110X_BLACK);
   myOLED.drawLine(120, lineStart, 120, lineEnd, SH110X_WHITE);
   myOLED.setTextColor(SH110X_WHITE);
@@ -533,16 +523,13 @@ bool checkForTimeoutAndDisplayCurrTime(timerStruct& Timer1Sec) {
   if (Timer1Sec.currTime > 4) {
     myOLED.setCursor(118, lineEnd);
   } else myOLED.setCursor(112+Timer1Sec.currTime, lineEnd);
+
   myOLED.print("*");
   myOLED.drawBitmap(104, 48, BOMB, 17, 15, SH110X_WHITE);
   myOLED.display();
-  if (Timer1Sec.timeOut) {
-    return true;
-  }
-  return false;
 }
 
-void selectFirstRowCol(HackMeStruct& HackMeGame) {
+void SelectFirstRowCol(gameStruct& HackMeGame) {
   myOLED.fillRect(1,-1, 79, 9, SH110X_INVERSE);
   myOLED.fillRect(1,0, 9, 63, SH110X_INVERSE);
   HackMeGame.SelectedRow = 0;

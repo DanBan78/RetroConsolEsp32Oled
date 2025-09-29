@@ -8,12 +8,11 @@
   #include <EEPROM.h>
   #include <Wire.h>
   #include <pgmspace.h>
-  #include <Fonts/TomThumb.h>
   #include <esp_sleep.h>
   #include <driver/gpio.h>
-  #include <driver/rtc_io.h>
 
   #define HALT while(1)
+
 	#define OLED_RESET     -1    // Reset pin # (or -1 if sharing Arduino reset pin)
 	#define SCREEN_ADDRESS 0x3C
 	#define SCREEN_WIDTH   128  // OLED display width, in pixels
@@ -24,17 +23,12 @@
 
   extern Adafruit_SH1106G myOLED;
 
-  extern bool soundEnabled;
-  extern bool sounddone;
-  extern bool pauseGame;
-  extern bool Debug;
-  extern int GameSpeed;
+  extern bool SoundEnabled;
   extern int GameSelected;
-  extern int score;
-  extern int SessionScore;
+  extern int Score;
 
   extern const int totalGamesNo;
-  extern unsigned long lastButtonPress;
+  extern unsigned long lastButtonPressTime;
   extern bool sleepModeActive;
 
   // Buttons
@@ -51,7 +45,6 @@
   #define Game_SnoopyRecord 16
   #define Game_SpaceShooterRecord 20
 
-//  bool ActiveButton = false;
   enum btPressedCode { UpLeft, DownRight, NONE, UpRight, DownLeft, ALL_BTN };
 
   typedef void (*GameLaunchFunc)();
@@ -70,6 +63,15 @@
     unsigned long prevTimeCheck;
   };
   extern timerStruct Timer1Sec;
+
+  // GameInfo deklaracje - muszą być po definicji struct GameInfo
+  extern const GameInfo* allGames[];
+  extern const GameInfo HelpInfo;
+  extern const GameInfo GameInfo_Dino;
+  extern const GameInfo GameInfo_Snoopy;
+  extern const GameInfo GameInfo_Slalom;
+  extern const GameInfo GameInfo_HackMe;
+  extern const GameInfo GameInfo_Cymbergaj;
 
   #define BUZZER_PIN 2
   #define BUZZER_CHANNEL 0
@@ -112,17 +114,16 @@ const char* const teksty[] PROGMEM = { str0, str1, str2, str3, str4, str5,
   bool IsPressed(btPressedCode button);
   bool CheckIfTimePassed(unsigned long& LastTimeCheckOneSec, unsigned long interval);
 
-  void displayVar(int i);
   void DisplayHelpInfo();
-  void displaySoundInfo(uint8_t x, uint8_t y, bool sound);
-  void displaySoundInfo2(bool sound);
-  void displayMenu(int MenuStartRow, int totalGamesNo);
-  void WaitforButton();
+  void DisplaySoundInfo(uint8_t x, uint8_t y, bool sound);
+  void DisplayMenu(int MenuStartRow, int totalGamesNo);
+  void WaitForAnyButtonToContinue();
+  void WaitForButtonRelease();
   void MyTune(int freq, int duration_ms);
   void WelcomeScreen();
   void CheckIfResetHighscores();
   void DisplayHighscores();
-  void SerialPrintFreeRam();
+
   bool checkForSleep();
   bool isSleeping();
   void wakeFromSleep();

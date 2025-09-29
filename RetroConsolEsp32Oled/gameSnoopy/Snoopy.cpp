@@ -11,16 +11,16 @@ void Game_Snoopy() {
   while (true) {
     WelcomeSnoopyScreen();
     SnoopyInit(Snoopy, allBallLines); 
-    WaitforButton();
+    WaitForAnyButtonToContinue();
     Snoopy.prevUpdateTime  = millis();
 
     while (Snoopy.lives!=0) {
-      displaySoundInfo(120, 0, soundEnabled);
+      DisplaySoundInfo(120, 0, SoundEnabled);
       if (ItsTimeToMoveBall(Snoopy)) {
         DisplayBallsOnScreen(allBallLines);
         CheckIfBallDropped(Snoopy, allBallLines);
         // update game speed every 10 points
-        if (Snoopy.score > 30) Snoopy.frameUpdateRate = Snoopy.initFrameUpdateRate - (Snoopy.score/10)*15;
+        if (Score > 30) Snoopy.frameUpdateRate = Snoopy.initFrameUpdateRate - (Score/10)*15;
         if (Snoopy.lives == 0) break;
         if (NewBallIsRequired(Snoopy, allBallLines)) {
           for (int i = 0; i < 4; i++) {
@@ -102,7 +102,7 @@ void SnoopyDisplayScore(snoopyStr& Snoopy) {
   myOLED.setTextSize(1);
   myOLED.setCursor(0,0);
   myOLED.print(F("Balls: "));
-  myOLED.print(Snoopy.score);
+  myOLED.print(Score);
 }
 
 void DisplayBallsOnScreen(BallLineStr allBallLines[4]) {
@@ -119,7 +119,7 @@ void DisplayBallsOnScreen(BallLineStr allBallLines[4]) {
       break;
     }
   }
-  if (soundEnabled && BallsOnScreen) {
+  if (SoundEnabled && BallsOnScreen) {
     MyTune(TON_Ball_FREQ, TON_Ball_CZAS);
   } else delay(TON_Ball_CZAS);
 }
@@ -172,7 +172,7 @@ void SnoopyInit(snoopyStr& Snoopy, BallLineStr allBallLines[4]) {
   }
   // init values
   Snoopy.lives = 3;
-  Snoopy.score = 0;
+  Score = 0;
   Snoopy.direction = sResting;
   Snoopy.frameUpdateRate = Snoopy.initFrameUpdateRate;
   SnoopyDisplayScore(Snoopy);
@@ -195,8 +195,8 @@ void CheckIfBallDropped(snoopyStr& Snoopy, BallLineStr allBallLines[4]) {
   for (int i = 0; i < 4; i++) {
     if ((allBallLines[i].position & 128) == 128) {
       if (Snoopy.direction == allBallLines[i].direction) {
-        Snoopy.score++;
-        if(soundEnabled) {
+        Score++;
+        if(SoundEnabled) {
           MyTune(TON_POINT_FREQ, TON_POINT_CZAS);
         } else delay(TON_POINT_CZAS);
       } else {
@@ -205,7 +205,7 @@ void CheckIfBallDropped(snoopyStr& Snoopy, BallLineStr allBallLines[4]) {
 
         if (Snoopy.lives == 0) {
           DisplayGameOverSnoopy(Snoopy);
-          WaitforButton();
+          WaitForAnyButtonToContinue();
         }
         ClearBallLines(allBallLines);
       }
@@ -232,7 +232,7 @@ void DisplayBrokenBall(snoopyStr& Snoopy, orientation pos) {
   DrawSnoopy(Snoopy.direction, SH110X_WHITE);
   myOLED.drawBitmap(x, y, BrokenBall_bmp, 23, 16, SH110X_WHITE);
   myOLED.display();
-  if(soundEnabled) {
+  if(SoundEnabled) {
     MyTune(TON_ERROR_FREQ, TON_ERROR_CZAS);
   } else delay(TON_ERROR_CZAS);
   
@@ -250,19 +250,19 @@ bool NewBallIsRequired(snoopyStr& Snoopy, BallLineStr allBallLines[4]) {
     totalBallsPos |= allBallLines[i].position;
   }
 
-  if (Snoopy.score < 5 || totalBallsPos == 128 || BallsOnLinesCount == 0) {
+  if (Score < 5 || totalBallsPos == 128 || BallsOnLinesCount == 0) {
     if ((totalBallsPos == 128 && BallsOnLinesCount == 1) || (BallsOnLinesCount == 0)) {
       AddFirstBall(allBallLines);
       return true;
     }
     return false;
 
-  } else if (Snoopy.score < 20 || BallsOnLinesCount == 1) {
+  } else if (Score < 20 || BallsOnLinesCount == 1) {
     if ((totalBallsPos & 0b00000111) != 0 || (BallsOnLinesCount == 2)) return false;
     AddFirstBall(allBallLines);
     return true;
 
-  } else if ((Snoopy.score >= 20) && (BallsOnLinesCount == 2)) {
+  } else if ((Score >= 20) && (BallsOnLinesCount == 2)) {
     if ((totalBallsPos & 0b00000111) != 0) return false;
     while (1) {
       randomLineForNewBall = (orientation)random(0, 4);
@@ -277,8 +277,8 @@ bool NewBallIsRequired(snoopyStr& Snoopy, BallLineStr allBallLines[4]) {
 
 void DisplayGameOverSnoopy(snoopyStr& Snoopy) {
   // Aktualizuj session score
-  if (Snoopy.score > Snoopy.sesionScore) {
-    Snoopy.sesionScore = Snoopy.score;
+  if (Score > Snoopy.sesionScore) {
+    Snoopy.sesionScore = Score;
   }
   
   // Sprawdź i zapisz highscore
@@ -290,10 +290,10 @@ void DisplayGameOverSnoopy(snoopyStr& Snoopy) {
     highscore = 0;
   }
   
-  if (Snoopy.score > highscore) {
-    EEPROM.put(Game_SnoopyRecord, Snoopy.score);
+  if (Score > highscore) {
+    EEPROM.put(Game_SnoopyRecord, Score);
     EEPROM.commit();
-    highscore = Snoopy.score; // Aktualizuj lokalną wartość dla wyświetlenia
+    highscore = Score; // Aktualizuj lokalną wartość dla wyświetlenia
   }
   
   // Wyświetl ekran końca gry
@@ -307,7 +307,7 @@ void DisplayGameOverSnoopy(snoopyStr& Snoopy) {
   myOLED.setTextSize(1);
   myOLED.setCursor(5, 25);
   myOLED.print(F("Your score: "));
-  myOLED.print(Snoopy.score);
+  myOLED.print(Score);
   
   myOLED.setCursor(5, 37);
   myOLED.print(F("Session best: "));

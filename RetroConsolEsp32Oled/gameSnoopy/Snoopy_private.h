@@ -14,15 +14,15 @@
 	typedef struct snoopyStr {
 		orientation direction = sWaiting;
 	    uint8_t lives = 3;
-		uint16_t score = 0;
 		uint16_t sesionScore = 0;
 		unsigned long prevUpdateTime = 0;
 		unsigned long initFrameUpdateRate = 300;
 		unsigned long frameUpdateRate = 500;
 	};
 
-	void Game_Snoopy();
+	//void Game_Snoopy();
 namespace SnoopyGame {
+
 	bool ItsTimeToMoveBall(snoopyStr& Snoopy);
 	void SnoopyInit(snoopyStr& Snoopy, BallLineStr allBallLines[4]);
     void DrawBalls(BallLineStr& BallLine, uint16_t color);

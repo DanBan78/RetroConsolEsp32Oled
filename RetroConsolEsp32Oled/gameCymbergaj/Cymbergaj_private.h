@@ -1,15 +1,16 @@
 #ifndef CYMBERGAJ_PRIVATE_H
 #define CYMBERGAJ_PRIVATE_H
 
+namespace CymbergajGame {
+
     #define HalfFieldY 31 
     #define HalfFieldX 63
     #define FieldXmax 126
     #define FieldYmax 62
-    #define  deltaX 4
+    #define DELTA_X 4
     #define CYM_MENU_ROW_MAX 3
     #define CYM_MENU_OPTION_IN_ROW_MAX 4
 
-    extern const GameInfo* allGames[] ; 
     enum direction {toRight=0, toRightDown, toRightUp, toLeft, toLeftDown, toLeftUp};
     enum collision {noCollision=0, collisionLeft, collisionRight};
     enum speed {Wolno=0, Srednio, Szybko};
@@ -33,7 +34,7 @@
       int score = 0;
     };
 
-    typedef struct cymGameStruct {
+    typedef struct gameStruct {
       bool updateScreen;
       collision isCollision;
       int playersNo;
@@ -46,7 +47,7 @@
       int padleDeltaMoveY;
       int padleHalfWidth;
       level difficulty;
-      speed BallSpeed;
+      speed ballSpeed;
     };
 
     typedef struct  cymMenuStruct {
@@ -68,34 +69,31 @@
         int rowOptionSelect[CYM_MENU_ROW_MAX] = { 1, 2,  2};
     };
  
-
-
-namespace CymbergajGame {
-  bool ItsGameOver(cymGameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  bool ItsGameOver(gameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   bool ItsTimeForBallPosUpdate(cymBallStruct& Ball);
-  bool ItsTimeForPadlePosUpdate(cymGameStruct& Game);
-  int UpdateBallDyAfterPadleHit(int BallX, int BallY, int LeftPadleY, int RightPadleY);
-  void UpdateBallPos(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  bool ItsTimeForPadlePosUpdate(gameStruct& Game);
+  int  UpdateBallDyAfterPadleHit(int BallX, int BallY, int LeftPadleY, int RightPadleY);
+  void UpdateBallPos(gameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   void UpdateBallXpos(cymBallStruct& Ball);
   void UpdateBallYpos(cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   void CheckIfBallHitBand(cymBallStruct& Ball);
-  void CheckIfLeftPlayerLostGoal(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
-  void CheckIfRightPlayerLostGoal(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
-  void CymInitParams(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
-  void CymParamsUpdateFromUserMenu(cymMenuStruct& Menu, cymGameStruct& Game);
-  void DisplayGameSummary(cymGameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
-  void DisplayGoal(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
-  void DisplayScore(cymGameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void CheckIfLeftPlayerLostGoal(gameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void CheckIfRightPlayerLostGoal(gameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void InitParams(gameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void ParamsUpdateFromUserMenu(cymMenuStruct& Menu, gameStruct& Game);
+  void DisplayGameSummary(gameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void DisplayGoal(gameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void DisplayScore(gameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   void DrawBall(cymBallStruct& Ball);
   void DrawField();
-  void DrawGameScreen(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
-  void DrawPadle(cymGameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void DrawGameScreen(gameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void DrawPadle(gameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   void Game_Cymbergaj();
-  void HandleLostGoal(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
-  void PadlePosAiUpdate(cymGameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
-  void PadlePosPlayerUpdate(cymGameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
-  void ShowUserMenu(cymMenuStruct& Menu, cymGameStruct& Game);
-  void UpdateBallPosAndCheckBandOrGoal(cymGameStruct& CymGame, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void HandleLostGoal(gameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void PadlePosAiUpdate(gameStruct& Game, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void PadlePosPlayerUpdate(gameStruct& Game, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
+  void ShowUserMenu(cymMenuStruct& Menu, gameStruct& Game);
+  void UpdateBallPosAndCheckBandOrGoal(gameStruct& CymGame, cymBallStruct& Ball, cymPlayerStruct& LeftPlayer, cymPlayerStruct& RightPlayer);
   void DisplayMenuStrings(cymMenuStruct& Menu, int SelectedRow);
 }
 

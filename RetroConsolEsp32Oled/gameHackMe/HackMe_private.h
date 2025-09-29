@@ -12,7 +12,7 @@
     bool matched;
   };
 
-  typedef struct HackMeStruct {
+  typedef struct gameStruct {
     uint8_t SelectedRow = 0;
     uint8_t SelectedCol = 0;
     bool newGame = false;
@@ -71,37 +71,34 @@ const unsigned char WYBUCH [] PROGMEM = {
   0x00, 0x00, 0x00, 0x0e, 0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0x3f, 0xe0, 0x00, 0x00, 
   0x00, 0x00, 0x00, 0x01, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0x00, 0x00, 0x00
 };
-  //void checkfreemem();
 
 namespace HackMeGame {
-  bool checkForTimeoutAndDisplayCurrTime(timerStruct& Timer1Sec);
-  bool DigitIsWrong(HackMeStruct& Game);
-  bool FirstDigitIsWrong(HackMeStruct& Game, timerStruct& Timer1Sec);
-  bool FourthDigitIsWrong(HackMeStruct& Game, timerStruct& Timer1Sec);
-  bool SecondDigitIsWrong(HackMeStruct& Game, timerStruct& Timer1Sec);
-  bool ThirdDigitIsWrong(HackMeStruct& Game, timerStruct& Timer1Sec);
-  void checkIfGameEndOrRestart(HackMeStruct& HackMeGame, timerStruct& Timer1Sec);
+  bool TimeOutBombExplode(timerStruct& Timer1Sec);
+  bool SelectedDigitIsWrong(gameStruct& Game);
+  bool FirstDigitIsWrong(gameStruct& Game, timerStruct& Timer1Sec);
+  bool FourthDigitIsWrong(gameStruct& Game, timerStruct& Timer1Sec);
+  bool SecondDigitIsWrong(gameStruct& Game, timerStruct& Timer1Sec);
+  bool ThirdDigitIsWrong(gameStruct& Game, timerStruct& Timer1Sec);
   void CodeResolved();
-  void displayBombExplosion();
-  void DisplayCode(HackMeStruct& Game, uint8_t ileZnakow);
-  void displayMatrix(HackMeStruct& Game);
-  void DisplayMixedCodeAndStartCountingDown(HackMeStruct& HackMeGame, timerStruct& Timer1Sec);
-  void displayResolution(HackMeStruct& Game);
-  void hdisplaySoundInfo();
-  void errorSound();
-  void GameRestart(HackMeStruct& HackMeGame);
-  void GenerateCode(HackMeStruct& Game, uint8_t ileZnakow);
-  void GenerateRandomCodeMatrix(HackMeStruct& Game);
-  void initGameParameters(HackMeStruct& HackMeGame, timerStruct& Timer1Sec);
-  void mixCode(HackMeStruct& Game,uint8_t ileZnakow);
-  void mixedCodeDisplay (HackMeStruct& Game);
-  void randomMatrix(HackMeStruct& Game);
-  void SelectCol_x(HackMeStruct& Game);
-  void selectFirstRowCol(HackMeStruct& Game);
-  void SelectRow_y(HackMeStruct& Game);
-  void timeEndedGameOver(HackMeStruct& HackMeGame, timerStruct& Timer1Sec);
+  void DisplayExplosion();
+  void DisplayCodeMatrix(gameStruct& Game);
+  void DisplayMixedCodeAndStartCountingDown(gameStruct& HackMeGame, timerStruct& Timer1Sec);
+  void DisplayResolution(gameStruct& Game);
+  void ErrorSound();
+  void GameRestart(gameStruct& HackMeGame);
+  void GenerateCode(gameStruct& Game, uint8_t ileZnakow);
+  void GenerateRandomCodeMatrix(gameStruct& Game);
+  void GenerateAndDisplayCodeMatrix(gameStruct& HackMeGame);
+  void GameParams(gameStruct& HackMeGame, timerStruct& Timer1Sec);
+  void MixCode(gameStruct& Game,uint8_t ileZnakow);
+  void MixedCodeDisplay (gameStruct& Game);
+  void SelectCol_x(uint8_t SelectCol, uint8_t UnselectCol);
+  void SelectFirstRowCol(gameStruct& Game);
+  void SelectRow_y(uint8_t SelectRow, uint8_t UnselectRow);
+  void DisplayExplosionAndResolution(gameStruct& HackMeGame, timerStruct& Timer1Sec);
   void Timer_Interrupt(timerStruct& t);
-  void WelcomeHackMeScreen();
+  void WelcomeScreen();
+  void DisplayTimeToExplosion(timerStruct& Timer1Sec);
 }
 
 #endif
