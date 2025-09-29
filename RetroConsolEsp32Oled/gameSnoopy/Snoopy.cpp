@@ -53,7 +53,7 @@ void WelcomeSnoopyScreen() {
 
   myOLED.println("right down shelf > o");
   myOLED.display();
-  delay(DELAY1500MS);
+  delay(DELAY1000MS);
 } 
 
 void AddFirstBall(BallLineStr allBallLines[4]) {

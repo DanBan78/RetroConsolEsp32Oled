@@ -474,7 +474,7 @@ void WelcomeHackMeScreen() {
 
   myOLED.println("    Enter > o");
   myOLED.display();
-  delay(DELAY1500MS);
+  delay(DELAY1000MS);
 } 
 
 void GenerateRandomCodeMatrix(HackMeStruct& HackMeGame) {

@@ -500,7 +500,7 @@ void WelcomeSlalomScreen() {
   myOLED.setCursor(45, 42);
   myOLED.println("    right > o");
   myOLED.display();
-  delay(DELAY1500MS);
+  delay(DELAY1000MS);
 } 
 
 void Game_Slalom() {
@@ -526,12 +526,10 @@ void Game_Slalom() {
         CheckIfColissionHappen();
         CleanRow5();
         AddFuelStation();
-        //AddPlamaOleju();
         myOLED.display();
       } else if (carMoved) {
-        // Auto się poruszyło, ale nie ma nowej klatki - tylko przemaluj auto
         DisplayCar(car_x);
-        myOLED.display(); // Natychmiast odśwież ekran po ruchu
+        myOLED.display();
       }
       CalculateGameSpeedAndLevel();
       checkIfGameOver();

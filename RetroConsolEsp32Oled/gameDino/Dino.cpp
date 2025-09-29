@@ -22,7 +22,7 @@ namespace DinoGame {
       DisplayWelcomeScreen();
       while (1) {
         InitValuesAfterReplay(DinoGame, Dino, Aero, obst1, obst2, GameConst);
-        delay(DELAY1500MS);
+        delay(DELAY1000MS);
         FirstGameFrame(DinoGame, Dino, obst1, obst2, GameConst);
 
         PlayGame(DinoGame, Dino, Aero, obst1, obst2, GameConst);
